@@ -12,15 +12,15 @@ from .chr_wifi_configuration import ChrWifiConfiguration
 
 
 __all__ = [
-    ChrBattery,
-    ChrCpuTemperature,
-    ChrCpuUsage,
-    ChrDeviceId,
-    ChrDiskUsage,
-    ChrIP,
-    ChrModel,
-    ChrNetwork,
-    ChrPower,
-    ChrRamUsage,
-    ChrWifiConfiguration,
+    "ChrBattery",
+    "ChrCpuTemperature",
+    "ChrCpuUsage",
+    "ChrDeviceId",
+    "ChrDiskUsage",
+    "ChrIP",
+    "ChrModel",
+    "ChrNetwork",
+    "ChrPower",
+    "ChrRamUsage",
+    "ChrWifiConfiguration",
 ]

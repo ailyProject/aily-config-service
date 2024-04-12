@@ -2,6 +2,7 @@ import socket
 import array
 
 from pybleno import Characteristic
+from loguru import logger
 
 
 class ChrIP(Characteristic):
@@ -30,8 +31,12 @@ class ChrIP(Characteristic):
         return IP
 
     def onReadRequest(self, offset, callback):
-        ip_address = self.get_ip()
-        print("ChrIP - onReadRequest: value = " + str(ip_address))
-        # 获取当前ip地址
-        self._value = bytes(ip_address, "utf8")
-        callback(Characteristic.RESULT_SUCCESS, self._value)
+        try:
+            ip_address = self.get_ip()
+            logger.info("ChrIP - onReadRequest: value = " + str(ip_address))
+            # 获取当前ip地址
+            self._value = bytes(ip_address, "utf8")
+            callback(Characteristic.RESULT_SUCCESS, self._value)
+        except Exception as e:
+            logger.error(f"ChrIP - onReadRequest: {e}")
+            callback(Characteristic.RESULT_UNLIKELY_ERROR, None)

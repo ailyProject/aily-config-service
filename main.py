@@ -49,10 +49,9 @@ def onAdvertisingStart(error):
                             ChrCpuUsage("123e4567-e89b-12d3-a456-426614174006"),
                             ChrRamUsage("123e4567-e89b-12d3-a456-426614174007"),
                             ChrDiskUsage("123e4567-e89b-12d3-a456-426614174008"),
-                            ChrBattery("123e4567-e89b-12d3-a456-42661417409"),
-                            ChrPower("123e4567-e89b-12d3-a456-42661417410"),
-                            
-                            ChrWifiConfiguration("123e4567-e89b-12d3-a456-b827eb8fa857")
+                            ChrBattery("123e4567-e89b-12d3-a456-426614174009"),
+                            ChrPower("123e4567-e89b-12d3-a456-426614174010"),
+                            ChrWifiConfiguration("123e4567-e89b-12d3-a456-00805f9b34fb")
                         ],
                     }
                 )

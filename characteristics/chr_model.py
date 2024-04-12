@@ -1,4 +1,5 @@
 from pybleno import Characteristic
+from loguru import logger
 
 
 class ChrModel(Characteristic):
@@ -14,11 +15,15 @@ class ChrModel(Characteristic):
         self._value = None
 
     def onReadRequest(self, offset, callback):
-        data = self.get_llm_model()
-        print("ChrModel - onReadRequest: value = " + str(data))
-        # 获取当前ip地址
-        self._value = bytes(data, "utf8")
-        callback(Characteristic.RESULT_SUCCESS, self._value)
+        try:
+            data = self.get_llm_model()
+            logger.info("ChrModel - onReadRequest: value = " + str(data))
+            # 获取当前ip地址
+            self._value = bytes(data, "utf8")
+            callback(Characteristic.RESULT_SUCCESS, self._value)
+        except Exception as e:
+            logger.error(f"ChrModel - onReadRequest: {e}")
+            callback(Characteristic.RESULT_UNLIKELY_ERROR, None)
 
     @staticmethod
     def get_llm_model():

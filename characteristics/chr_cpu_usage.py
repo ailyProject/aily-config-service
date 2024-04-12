@@ -1,5 +1,6 @@
 import psutil
 from pybleno import Characteristic
+from loguru import logger
 
 
 class ChrCpuUsage(Characteristic):
@@ -15,10 +16,14 @@ class ChrCpuUsage(Characteristic):
         self._value = None
 
     def onReadRequest(self, offset, callback):
-        usage = self.get_cpu_usage()
-        print("ChrCpuUsage - onReadRequest: value = " + str(usage))
-        self._value = bytes(str(usage), "utf8")
-        callback(Characteristic.RESULT_SUCCESS, self._value)
+        try:
+            usage = self.get_cpu_usage()
+            logger.info("ChrCpuUsage - onReadRequest: value = " + str(usage))
+            self._value = bytes(str(usage), "utf8")
+            callback(Characteristic.RESULT_SUCCESS, self._value)
+        except Exception as e:
+            logger.error(f"ChrCpuUsage - onReadRequest: {e}")
+            callback(Characteristic.RESULT_UNLIKELY_ERROR, None)
 
     @staticmethod
     def get_cpu_usage():

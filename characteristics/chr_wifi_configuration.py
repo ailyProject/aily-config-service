@@ -1,6 +1,7 @@
 import json
 import os
 from pybleno import Characteristic
+from loguru import logger
 
 
 class ChrWifiConfiguration(Characteristic):
@@ -16,20 +17,30 @@ class ChrWifiConfiguration(Characteristic):
         self._value = None
 
     def onReadRequest(self, offset, callback):
-        print("ChrWifiConfiguration - onReadRequest: value = " + str(self._value))
-        callback(Characteristic.RESULT_SUCCESS, bytes(self._value))
+        try:
+            logger.info(
+                "ChrWifiConfiguration - onReadRequest: value = " + str(self._value)
+            )
+            callback(Characteristic.RESULT_SUCCESS, bytes(self._value))
+        except Exception as e:
+            logger.error(f"ChrWifiConfiguration - onReadRequest: {e}")
+            callback(Characteristic.RESULT_UNLIKELY_ERROR, None)
 
     def onWriteRequest(self, data, offset, withoutResponse, callback):
-        self._value = data
-        print(
-            "ChrWifiConfiguration - onWriteRequest: value = "
-            + self._value.decode("utf-8")
-        )
-        data = json.loads(self._value.decode("utf-8"))
-        result = self.connect(data["ap"], data["password"])
-        if result:
-            callback(Characteristic.RESULT_SUCCESS)
-        else:
+        try:
+            self._value = data
+            logger.info(
+                "ChrWifiConfiguration - onWriteRequest: value = "
+                + self._value.decode("utf-8")
+            )
+            data = json.loads(self._value.decode("utf-8"))
+            result = self.connect(data["ap"], data["password"])
+            if result:
+                callback(Characteristic.RESULT_SUCCESS)
+            else:
+                callback(Characteristic.RESULT_UNLIKELY_ERROR)
+        except Exception as e:
+            logger.error(f"ChrWifiConfiguration - onWriteRequest: {e}")
             callback(Characteristic.RESULT_UNLIKELY_ERROR)
 
     @staticmethod
@@ -52,6 +63,6 @@ class ChrWifiConfiguration(Characteristic):
         with open("/etc/wpa_supplicant/wpa_supplicant.conf", "w") as wifi:
             wifi.write(config)
 
-        print("Wifi config added. Refreshing configs")
+        logger.info("Wifi config added. Refreshing configs")
         ## refresh configs
         os.popen("sudo wpa_cli -i wlan0 reconfigure")

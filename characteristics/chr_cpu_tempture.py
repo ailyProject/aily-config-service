@@ -1,5 +1,6 @@
 import psutil
 from pybleno import Characteristic
+from loguru import logger
 
 
 class ChrCpuTemperature(Characteristic):
@@ -15,10 +16,14 @@ class ChrCpuTemperature(Characteristic):
         self._value = None
 
     def onReadRequest(self, offset, callback):
-        temp = self.get_cpu_tempture()
-        print("ChrCpuTemperature - onReadRequest: value = " + str(temp))
-        self._value = bytes(str(temp), "utf8")
-        callback(Characteristic.RESULT_SUCCESS, self._value)
+        try:
+            temp = self.get_cpu_tempture()
+            logger.info("ChrCpuTemperature - onReadRequest: value = " + str(temp))
+            self._value = bytes(str(temp), "utf8")
+            callback(Characteristic.RESULT_SUCCESS, self._value)
+        except Exception as e:
+            logger.error(f"ChrCpuTemperature - onReadRequest: {e}")
+            callback(Characteristic.RESULT_UNLIKELY_ERROR, None)
 
     @staticmethod
     def get_cpu_tempture():

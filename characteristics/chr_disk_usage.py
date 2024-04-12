@@ -1,5 +1,6 @@
 import psutil
 from pybleno import Characteristic
+from loguru import logger
 
 
 class ChrDiskUsage(Characteristic):
@@ -15,10 +16,14 @@ class ChrDiskUsage(Characteristic):
         self._value = None
 
     def onReadRequest(self, offset, callback):
-        data = self.get_disk_usage()
-        print("ChrDiskUsage - onReadRequest: value = " + str(data))
-        self._value = bytes(str(data), "utf8")
-        callback(Characteristic.RESULT_SUCCESS, self._value)
+        try:
+            data = self.get_disk_usage()
+            logger.info("ChrDiskUsage - onReadRequest: value = " + str(data))
+            self._value = bytes(str(data), "utf8")
+            callback(Characteristic.RESULT_SUCCESS, self._value)
+        except Exception as e:
+            logger.error(f"ChrDiskUsage - onReadRequest: {e}")
+            callback(Characteristic.RESULT_UNLIKELY_ERROR, None)
 
     @staticmethod
     def get_disk_usage():
