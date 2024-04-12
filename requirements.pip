@@ -1,0 +1,3 @@
+pybleno==0.11
+loguru==0.7.2
+psutil==5.9.8
