@@ -10,7 +10,7 @@ class ChrWifiConfiguration(Characteristic):
             self,
             {
                 "uuid": uuid,
-                "properties": ["read", "write"],
+                "properties": ["read", "write", "notify"],
                 "value": None,
             },
         )

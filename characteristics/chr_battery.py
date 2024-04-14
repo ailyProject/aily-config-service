@@ -9,7 +9,7 @@ class ChrBattery(Characteristic):
             self,
             {
                 "uuid": uuid,
-                "properties": ["read"],
+                "properties": ["read", "notify"],
                 "value": None,
             },
         )
