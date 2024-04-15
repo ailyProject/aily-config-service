@@ -1,4 +1,5 @@
 import sys
+import asyncio
 
 from pybleno import Bleno, BlenoPrimaryService
 from loguru import logger
@@ -63,12 +64,11 @@ bleno.on("advertisingStart", onAdvertisingStart)
 
 bleno.start()
 
-logger.info("Hit <ENTER> to disconnect")
-
-if sys.version_info > (3, 0):
-    input()
-else:
-    raw_input()
+try:
+    loop = asyncio.get_event_loop()
+    loop.run_forever()
+except KeyboardInterrupt:
+    logger.info("Keyboard interrupt detected")
 
 bleno.stopAdvertising()
 bleno.disconnect()

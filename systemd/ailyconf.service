@@ -1,0 +1,14 @@
+[Unit]
+Description=Aliy config service
+After=multi-user.target
+
+[Service]
+Type=simple
+User=root
+Group=root
+Restart=on-failure
+RestartSec=5s
+ExecStart=/home/pi/coding/aily-config-service/venv/bin/python /home/pi/coding/aily-config-service/main.py
+
+[Install]
+WantedBy=multi-user.target
