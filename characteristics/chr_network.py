@@ -1,5 +1,7 @@
+import psutil
 from pybleno import Characteristic
 from loguru import logger
+import re
 
 
 class ChrNetwork(Characteristic):
@@ -18,7 +20,6 @@ class ChrNetwork(Characteristic):
         try:
             data = self.get_network()
             logger.info("ChrNetwork - onReadRequest: value = " + str(data))
-            # 获取当前ip地址
             self._value = bytes(data, "utf8")
             callback(Characteristic.RESULT_SUCCESS, self._value)
         except Exception as e:
@@ -28,4 +29,20 @@ class ChrNetwork(Characteristic):
     @staticmethod
     def get_network():
         # TODO: Implement this method
-        return None
+        net_status_list = psutil.net_if_stats()
+        # 当前网络接口
+        current_net = None
+        for key, value in net_status_list.items():
+            if re.match(r"^lo", key):
+                continue
+            if value.isup:
+                current_net = key
+
+        if current_net is None:
+            return "无"
+        elif re.match(r"^wlan", current_net):
+            return "WiFi"
+        elif re.match(r"^eth", current_net):
+            return "有线"
+        else:
+            return "UNKNOWN"
