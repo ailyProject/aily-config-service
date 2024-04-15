@@ -39,10 +39,10 @@ class ChrNetwork(Characteristic):
                 current_net = key
 
         if current_net is None:
-            return "无"
+            return "None"
         elif re.match(r"^wlan", current_net):
             return "WiFi"
         elif re.match(r"^eth", current_net):
-            return "有线"
+            return "Wired"
         else:
             return "UNKNOWN"
