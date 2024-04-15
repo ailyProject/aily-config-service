@@ -18,6 +18,7 @@ class ChrCpuTemperature(Characteristic):
     def onReadRequest(self, offset, callback):
         try:
             temp = self.get_cpu_tempture()
+            logger.info("temp: {0}".format(temp))
             logger.info("ChrCpuTemperature - onReadRequest: value = " + str(temp))
             self._value = bytes(str(temp), "utf8")
             callback(Characteristic.RESULT_SUCCESS, self._value)
@@ -27,7 +28,9 @@ class ChrCpuTemperature(Characteristic):
 
     @staticmethod
     def get_cpu_tempture():
-        # cpu_usage = p(interval=1)
-        # return cpu_usage
-        # TODO: Implement get_cpu_tempture
-        return 0
+        try:
+            with open("/sys/class/thermal/thermal_zone0/temp") as temp_file:
+                cpu_temp = temp_file.read()
+                return round(float(cpu_temp) / 1000, 2)
+        except FileNotFoundError:
+            return "N/A"
