@@ -3,7 +3,7 @@
 set -e
 
 # 克隆代码库
-cd ~
+cd $HOME
 git clone -b py https://github.com/ailyProject/aily-config-service.git
 cd aily-config-service
 
