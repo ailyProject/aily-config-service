@@ -9,7 +9,7 @@ cd aily-config-service
 
 # 创建虚拟环境并安装依赖
 python3 -m venv venv
-venv/bin/pip install -r requirements.txt
+venv/bin/pip install -r requirements.pip
 
 # 安装 supervisor
 sudo apt-get update && sudo apt-get install supervisor
@@ -29,7 +29,7 @@ echo "stdout_logfile_maxbytes = 1MB" >> $SUPERVISOR_CONF_FILE
 echo "stderr_logfile = /tmp/ailyconf-error.log" >> $SUPERVISOR_CONF_FILE
 echo "stderr_logfile_maxbytes = 1MB" >> $SUPERVISOR_CONF_FILE
 
-sudo cp supervisor/$SUPERVISOR_CONF_FILE $SUPERVISOR_CONF_DIR
+sudo cp $SUPERVISOR_CONF_FILE $SUPERVISOR_CONF_DIR
 sudo supervisorctl reload
 
 # 检查命令是否成功执行
