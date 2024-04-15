@@ -28,7 +28,6 @@ class ChrNetwork(Characteristic):
 
     @staticmethod
     def get_network():
-        # TODO: Implement this method
         net_status_list = psutil.net_if_stats()
         # 当前网络接口
         current_net = None
