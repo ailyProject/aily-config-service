@@ -18,7 +18,7 @@ class ChrDeviceId(Characteristic):
 
     def onReadRequest(self, offset, callback):
         try:
-            hostname = self.get_hostname()
+            hostname = self.get_mac()
             logger.info("ChrDeviceId - onReadRequest: value = " + hostname)
             self._value = bytes(hostname, "utf8")
             callback(Characteristic.RESULT_SUCCESS, self._value)
@@ -32,10 +32,8 @@ class ChrDeviceId(Characteristic):
 
     @staticmethod
     def get_mac():
-        mac = ":".join(
-            [
-                "{:02x}".format((uuid.getnode() >> elements) & 0xFF)
-                for elements in range(0, 2 * 6, 8)
-            ][::-1]
-        )
-        return mac
+        # 获取 MAC 地址
+        mac = uuid.getnode()
+        # 转换为常见的 MAC 地址格式
+        mac_address = ':'.join(('%012X' % mac)[i:i+2] for i in range(0, 12, 2))
+        return mac_address

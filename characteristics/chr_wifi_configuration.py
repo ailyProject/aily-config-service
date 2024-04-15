@@ -34,7 +34,7 @@ class ChrWifiConfiguration(Characteristic):
                 + self._value.decode("utf-8")
             )
             data = json.loads(self._value.decode("utf-8"))
-            result = self.connect(data["ap"], data["password"])
+            result = self.connect(data["ssid"], data["password"])
             if result:
                 callback(Characteristic.RESULT_SUCCESS)
             else:
@@ -66,3 +66,4 @@ class ChrWifiConfiguration(Characteristic):
         logger.info("Wifi config added. Refreshing configs")
         ## refresh configs
         os.popen("sudo wpa_cli -i wlan0 reconfigure")
+        return True
