@@ -35,5 +35,5 @@ class ChrDeviceId(Characteristic):
         # 获取 MAC 地址
         mac = uuid.getnode()
         # 转换为常见的 MAC 地址格式
-        mac_address = ':'.join(('%012X' % mac)[i:i+2] for i in range(0, 12, 2))
+        mac_address = ''.join(('%012X' % mac)[i:i+2] for i in range(0, 12, 2))
         return mac_address
