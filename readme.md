@@ -4,7 +4,7 @@
 ## 拉取与配置
 - 拉取服务
 ```shell
-git clone https://github.com/ailyProject/aily-config-service.git
+git clone -b py https://github.com/ailyProject/aily-config-service.git
 ```
 
 - 安装环境
