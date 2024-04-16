@@ -1,5 +1,7 @@
+import os
 from pybleno import Characteristic
 from loguru import logger
+from aily import CtlAily
 
 
 class ChrModel(Characteristic):
@@ -27,5 +29,5 @@ class ChrModel(Characteristic):
 
     @staticmethod
     def get_llm_model():
-        # TODO Implement this method
-        return "GPT-3.5-Turbo"
+        ctl = CtlAily()
+        return ctl.get_llm_model()

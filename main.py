@@ -3,6 +3,9 @@ import asyncio
 
 from pybleno import Bleno, BlenoPrimaryService
 from loguru import logger
+from dotenv import load_dotenv
+
+load_dotenv(".env")
 
 from characteristics import *
 
@@ -52,7 +55,8 @@ def onAdvertisingStart(error):
                             ChrDiskUsage("123e4567-e89b-12d3-a456-426614174008"),
                             ChrBattery("123e4567-e89b-12d3-a456-426614174009"),
                             ChrPower("123e4567-e89b-12d3-a456-426614174010"),
-                            ChrWifiConfiguration("123e4567-e89b-12d3-a456-00805f9b34fb")
+                            ChrWifiConfiguration("123e4567-e89b-12d3-a456-00805f9b34fb"),
+                            ChrModelConfiguration("123e4567-e89b-12d3-a456-00805f9b34fc")
                         ],
                     }
                 )

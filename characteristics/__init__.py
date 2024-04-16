@@ -9,6 +9,7 @@ from .chr_network import ChrNetwork
 from .chr_power import ChrPower
 from .chr_ram_usage import ChrRamUsage
 from .chr_wifi_configuration import ChrWifiConfiguration
+from .chr_model_configuration import ChrModelConfiguration
 
 
 __all__ = [
@@ -23,4 +24,5 @@ __all__ = [
     "ChrPower",
     "ChrRamUsage",
     "ChrWifiConfiguration",
+    "ChrModelConfiguration"
 ]
