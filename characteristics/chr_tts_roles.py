@@ -1,10 +1,11 @@
 import os
+import yaml
+import json
 from pybleno import Characteristic
 from loguru import logger
-from aily import AilyCtl
 
 
-class ChrModel(Characteristic):
+class ChrTTSRoles(Characteristic):
     def __init__(self, uuid):
         Characteristic.__init__(
             self,
@@ -18,16 +19,17 @@ class ChrModel(Characteristic):
 
     def onReadRequest(self, offset, callback):
         try:
-            data = self.get_llm_model()
-            logger.info("ChrModel - onReadRequest: value = " + str(data))
-            # 获取当前ip地址
+            data = self.get_conf()
+            logger.info("ChrTTSRoles - onReadRequest: value = " + str(data))
             self._value = bytes(data, "utf8")
             callback(Characteristic.RESULT_SUCCESS, self._value)
         except Exception as e:
-            logger.error(f"ChrModel - onReadRequest: {e}")
+            logger.error(f"ChrTTSRoles - onReadRequest: {e}")
             callback(Characteristic.RESULT_UNLIKELY_ERROR, None)
 
     @staticmethod
-    def get_llm_model():
-        ctl = AilyCtl()
-        return ctl.get_llm_model()
+    def get_conf():
+        conf_file = os.getenv("AILY_CONFIG_PATH")
+        with open(conf_file, "r") as f:
+            conf = yaml.safe_load(f)
+        return json.dumps(conf["tts"]["roles"])

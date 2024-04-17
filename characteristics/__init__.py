@@ -8,10 +8,16 @@ from .chr_model import ChrModel
 from .chr_network import ChrNetwork
 from .chr_power import ChrPower
 from .chr_ram_usage import ChrRamUsage
+
 from .chr_wifi_configuration import ChrWifiConfiguration
 from .chr_llm_configuration import ChrLLMConfiguration
 from .chr_stt_configuration import ChrSTTConfiguration
 from .chr_tts_configuration import ChrTTSConfiguration
+
+from .chr_llm_models import ChrLLMModels
+from .chr_stt_models import ChrSTTModels
+from .chr_tts_models import ChrTTSModels
+from .chr_tts_roles import ChrTTSRoles
 
 
 __all__ = [
@@ -29,4 +35,8 @@ __all__ = [
     "ChrLLMConfiguration",
     "ChrSTTConfiguration",
     "ChrTTSConfiguration",
+    "ChrLLMModels",
+    "ChrSTTModels",
+    "ChrTTSModels",
+    "ChrTTSRoles",
 ]

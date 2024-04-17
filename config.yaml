@@ -1,0 +1,47 @@
+llm:
+  models:
+    - name: chatGPT-gpt-3.5-turbo
+      value: gpt-3.5-turbo
+    - name: chatGPT-gpt-4-turbo
+      value: gpt-4-turbo
+
+stt:
+  models:
+    - name: chatGPT-whisper
+      value: whisper-1
+    - name: azure-voice
+      value: azure
+
+tts:
+  models:
+    - name: chatGPT-tts
+      value: tts-1
+    - name: edge-tts
+      value: edge
+  roles:
+    tts-1:
+      - name: alloy
+        value: alloy
+      - name: echo
+        value: echo
+      - name: fable
+        value: fable
+      - name: onyx
+        value: onyx
+      - name: nova
+        value: nova
+      - name: shimmer
+        value: shimmer
+    edge:
+      - name: zh-CN-xiaoxiao
+        value: zh-CN-XiaoxiaoNeural
+      - name: zh-CN-Xiaoyi
+        value: zh-CN-XiaoyiNeural
+      - name: zh-CN-Yunjian
+        value: zh-CN-YunjianNeural
+      - name: zh-CN-Yunxi
+        value: zh-CN-YunxiNeural
+      - name: zh-CN-Yunxia
+        value: zh-CN-YunxiaNeural
+      - name: zh-CN-Yunyang
+        value: zh-CN-YunyangNeural

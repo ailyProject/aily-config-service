@@ -4,7 +4,7 @@ from dotenv import set_key, load_dotenv
 from loguru import logger
 
 
-class CtlAily:
+class AilyCtl:
     aily_conf_path = None
     aily_supervisor_name = None
 

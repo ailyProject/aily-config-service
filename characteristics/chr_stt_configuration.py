@@ -2,7 +2,7 @@ import json
 import os
 from pybleno import Characteristic
 from loguru import logger
-from aily import CtlAily
+from aily import AilyCtl
 
 
 class ChrSTTConfiguration(Characteristic):
@@ -22,7 +22,7 @@ class ChrSTTConfiguration(Characteristic):
             if self._value:
                 callback(Characteristic.RESULT_SUCCESS, self._value)
             else:
-                aily = CtlAily()
+                aily = AilyCtl()
                 data = {
                     "stt_model": aily.get_stt_model(),
                     "stt_key": aily.get_stt_key(),
@@ -39,7 +39,7 @@ class ChrSTTConfiguration(Characteristic):
             data = json.loads(data.decode("utf-8"))
             logger.info("ChrSTTConfiguration - onWriteRequest: value = " + str(data))
 
-            aily = CtlAily()
+            aily = AilyCtl()
             for key, value in data.items():
                 if key == "stt_model":
                     aily.set_stt_model(value)

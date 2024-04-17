@@ -2,7 +2,7 @@ import json
 import os
 from pybleno import Characteristic
 from loguru import logger
-from aily import CtlAily
+from aily import AilyCtl
 
 
 class ChrLLMConfiguration(Characteristic):
@@ -22,7 +22,7 @@ class ChrLLMConfiguration(Characteristic):
             if self._value:
                 callback(Characteristic.RESULT_SUCCESS, self._value)
             else:
-                aily = CtlAily()
+                aily = AilyCtl()
                 data = {
                     "llm_model": aily.get_llm_model(),
                     "llm_key": aily.get_llm_key(),
@@ -41,7 +41,7 @@ class ChrLLMConfiguration(Characteristic):
             data = json.loads(data.decode("utf-8"))
             logger.info("ChrLLMModelConfiguration - onWriteRequest: value = " + str(data))
 
-            aily = CtlAily()
+            aily = AilyCtl()
             for key, value in data.items():
                 if key == "llm_model":
                     aily.set_llm_model(value)
