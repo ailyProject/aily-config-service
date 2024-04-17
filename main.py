@@ -56,7 +56,9 @@ def onAdvertisingStart(error):
                             ChrBattery("123e4567-e89b-12d3-a456-426614174009"),
                             ChrPower("123e4567-e89b-12d3-a456-426614174010"),
                             ChrWifiConfiguration("123e4567-e89b-12d3-a456-00805f9b34fb"),
-                            ChrModelConfiguration("123e4567-e89b-12d3-a456-00805f9b34fc")
+                            ChrLLMConfiguration("123e4567-e89b-12d3-a456-00805f9b34fc"),
+                            ChrSTTConfiguration("123e4567-e89b-12d3-a456-00805f9b34fd"),
+                            ChrTTSConfiguration("123e4567-e89b-12d3-a456-00805f9b34fe"),
                         ],
                     }
                 )

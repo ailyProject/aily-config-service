@@ -9,7 +9,9 @@ from .chr_network import ChrNetwork
 from .chr_power import ChrPower
 from .chr_ram_usage import ChrRamUsage
 from .chr_wifi_configuration import ChrWifiConfiguration
-from .chr_model_configuration import ChrModelConfiguration
+from .chr_llm_configuration import ChrLLMConfiguration
+from .chr_stt_configuration import ChrSTTConfiguration
+from .chr_tts_configuration import ChrTTSConfiguration
 
 
 __all__ = [
@@ -24,5 +26,7 @@ __all__ = [
     "ChrPower",
     "ChrRamUsage",
     "ChrWifiConfiguration",
-    "ChrModelConfiguration"
+    "ChrLLMConfiguration",
+    "ChrSTTConfiguration",
+    "ChrTTSConfiguration",
 ]
