@@ -136,11 +136,12 @@ class ChrDiskUsage(Characteristic):
         return disk_usage
     
     def loop_get(self):
-        while self._loop:
-            self._value = bytes(str(self.get_disk_usage()), "utf8")
-            if self._updateValueCallback:
-                self._updateValueCallback(self._value)
-            time.sleep(10)
+        pass
+        # while self._loop:
+        #     self._value = bytes(str(self.get_disk_usage()), "utf8")
+        #     if self._updateValueCallback:
+        #         self._updateValueCallback(self._value)
+        #     time.sleep(10)
 
 
 class ChrPower(Characteristic):
@@ -240,11 +241,12 @@ class ChrRamUsage(Characteristic):
         return ram_usage
     
     def loop_get(self):
-        while self._loop:
-            self._value = bytes(str(self.get_ram_usage()), "utf8")
-            if self._updateValueCallback:
-                self._updateValueCallback(self._value)
-            time.sleep(10)
+        pass
+        # while self._loop:
+        #     self._value = bytes(str(self.get_ram_usage()), "utf8")
+        #     if self._updateValueCallback:
+        #         self._updateValueCallback(self._value)
+        #     time.sleep(10)
 
 
 class ChrCpuTemperature(Characteristic):
@@ -296,11 +298,12 @@ class ChrCpuTemperature(Characteristic):
             return "N/A"
     
     def loop_get(self):
-        while self._loop:
-            self._value = bytes(str(self.get_cpu_tempture()), "utf8")
-            if self._updateValueCallback:
-                self._updateValueCallback(self._value)
-            time.sleep(10)
+        pass
+        # while self._loop:
+        #     self._value = bytes(str(self.get_cpu_tempture()), "utf8")
+        #     if self._updateValueCallback:
+        #         self._updateValueCallback(self._value)
+        #     time.sleep(10)
 
 
 class ChrCpuUsage(Characteristic):
@@ -333,7 +336,7 @@ class ChrCpuUsage(Characteristic):
         self._updateValueCallback = updateValueCallback
         self._loop = True
         
-        self.loop_get()
+        # self.loop_get()
 
     def onUnsubscribe(self):
         print('EchoCharacteristic - onUnsubscribe');
@@ -343,13 +346,14 @@ class ChrCpuUsage(Characteristic):
 
     @staticmethod
     def get_cpu_usage():
-        cpu_usage = psutil.cpu_percent(interval=10)
+        cpu_usage = psutil.cpu_percent(interval=3)
         return cpu_usage
     
     def loop_get(self):
-        while self._loop:
-            self._value = bytes(str(self.get_cpu_usage()), "utf8")
-            if self._updateValueCallback:
-                self._updateValueCallback(self._value)
-            time.sleep(10)
+        pass
+        # while self._loop:
+        #     self._value = bytes(str(self.get_cpu_usage()), "utf8")
+        #     if self._updateValueCallback:
+        #         self._updateValueCallback(self._value)
+        #     time.sleep(10)
             

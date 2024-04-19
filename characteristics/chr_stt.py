@@ -6,7 +6,7 @@ from loguru import logger
 from aily import AilyCtl
 
 
-class ChrSttModel(Characteristic):
+class ChrSTTModel(Characteristic):
     def __init__(self, uuid):
         Characteristic.__init__(
             self,
@@ -45,7 +45,7 @@ class ChrSttModel(Characteristic):
             callback(Characteristic.RESULT_UNLIKELY_ERROR)
 
 
-class ChrSttKey(Characteristic):
+class ChrSTTKey(Characteristic):
     def __init__(self, uuid):
         Characteristic.__init__(
             self,

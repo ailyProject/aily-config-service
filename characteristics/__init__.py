@@ -15,7 +15,7 @@ from .chr_llm import (
     ChrLLMTemp,
     ChrLLMModelOptions,
 )
-from .chr_stt import ChrSttModel, ChrSttKey, ChrSTTModelOptions
+from .chr_stt import ChrSTTModel, ChrSTTKey, ChrSTTModelOptions
 from .chr_tts import (
     ChrTTSModel,
     ChrTTSKey,
@@ -42,8 +42,8 @@ __all__ = [
     "ChrLLMPrePrompt",
     "ChrLLMTemp",
     "ChrLLMModelOptions",
-    "ChrSttModel",
-    "ChrSttKey",
+    "ChrSTTModel",
+    "ChrSTTKey",
     "ChrSTTModelOptions",
     "ChrTTSModel",
     "ChrTTSKey",
