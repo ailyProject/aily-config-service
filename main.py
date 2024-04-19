@@ -43,23 +43,25 @@ def onAdvertisingStart(error):
     logger.info("on -> advertisingStart: " + ("error " + error if error else "success"))
 
     if not error:
+        chr_ip = ChrIP("123e4567-e89b-12d3-a456-426614174004")
+        chr_network = ChrNetwork("123e4567-e89b-12d3-a456-426614174003")
         bleno.setServices(
             [
                 BlenoPrimaryService(
                     {
                         "uuid": "123e4567-e89b-12d3-a456-426614174000",
                         "characteristics": [
+                            chr_ip,
+                            chr_network,
                             ChrDeviceId("123e4567-e89b-12d3-a456-426614174001"),
                             ChrLLMModel("123e4567-e89b-12d3-a456-426614174002"),
-                            ChrNetwork("123e4567-e89b-12d3-a456-426614174003"),
-                            ChrIP("123e4567-e89b-12d3-a456-426614174004"),
                             ChrCpuTemperature("123e4567-e89b-12d3-a456-426614174005"),
                             ChrCpuUsage("123e4567-e89b-12d3-a456-426614174006"),
                             ChrRamUsage("123e4567-e89b-12d3-a456-426614174007"),
                             ChrDiskUsage("123e4567-e89b-12d3-a456-426614174008"),
                             ChrBattery("123e4567-e89b-12d3-a456-426614174009"),
                             ChrPower("123e4567-e89b-12d3-a456-426614174010"),
-                            ChrWifi("123e4567-e89b-12d3-a456-00805f9b34fb"),
+                            ChrWifi("123e4567-e89b-12d3-a456-00805f9b34fb", chr_ip=chr_ip, chr_network=chr_network),
                             ChrLLMKey("123e4567-e89b-12d3-a456-00805f9b34fd"),
                             ChrLLMPrePrompt("123e4567-e89b-12d3-a456-00805f9b34fe"),
                             ChrLLMTemp("123e4567-e89b-12d3-a456-00805f9b34ff"),

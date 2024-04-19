@@ -1,6 +1,7 @@
 import uuid
 import socket
 import psutil
+import time
 from pybleno import Characteristic
 from loguru import logger
 
@@ -51,6 +52,8 @@ class ChrBattery(Characteristic):
             },
         )
         self._value = None
+        self._loop = False
+        self._updateValueCallback = None
 
     def onReadRequest(self, offset, callback):
         try:
@@ -61,11 +64,32 @@ class ChrBattery(Characteristic):
         except Exception as e:
             logger.error(f"ChrBattery - onReadRequest: {e}")
             callback(Characteristic.RESULT_UNLIKELY_ERROR, None)
+    
+    def onSubscribe(self, maxValueSize, updateValueCallback):
+        print('EchoCharacteristic - onSubscribe')
+        
+        self._updateValueCallback = updateValueCallback
+        self._loop = True
+        
+        # self.loop_get()
+
+    def onUnsubscribe(self):
+        print('EchoCharacteristic - onUnsubscribe');
+        
+        self._loop = False
+        self._updateValueCallback = None
 
     @staticmethod
     def get_battery():
         battery = psutil.sensors_battery()
         return battery.percent
+    
+    # def loop_get(self):
+    #     while self._loop:
+    #         self._value = bytes(str(self.get_ram_usage()), "utf8")
+    #         if self._updateValueCallback:
+    #             self._updateValueCallback(self._value)
+    #         time.sleep(10)
 
 
 class ChrDiskUsage(Characteristic):
@@ -79,6 +103,8 @@ class ChrDiskUsage(Characteristic):
             },
         )
         self._value = None
+        self._loop = False
+        self._updateValueCallback = None
 
     def onReadRequest(self, offset, callback):
         try:
@@ -89,11 +115,32 @@ class ChrDiskUsage(Characteristic):
         except Exception as e:
             logger.error(f"ChrDiskUsage - onReadRequest: {e}")
             callback(Characteristic.RESULT_UNLIKELY_ERROR, None)
+    
+    def onSubscribe(self, maxValueSize, updateValueCallback):
+        print('EchoCharacteristic - onSubscribe')
+        
+        self._updateValueCallback = updateValueCallback
+        self._loop = True
+        
+        self.loop_get()
+
+    def onUnsubscribe(self):
+        print('EchoCharacteristic - onUnsubscribe');
+        
+        self._loop = False
+        self._updateValueCallback = None
 
     @staticmethod
     def get_disk_usage():
         disk_usage = psutil.disk_usage("/").percent
         return disk_usage
+    
+    def loop_get(self):
+        while self._loop:
+            self._value = bytes(str(self.get_disk_usage()), "utf8")
+            if self._updateValueCallback:
+                self._updateValueCallback(self._value)
+            time.sleep(10)
 
 
 class ChrPower(Characteristic):
@@ -107,6 +154,8 @@ class ChrPower(Characteristic):
             },
         )
         self._value = None
+        self._loop = False
+        self._updateValueCallback = None
 
     def onReadRequest(self, offset, callback):
         try:
@@ -117,12 +166,34 @@ class ChrPower(Characteristic):
         except Exception as e:
             logger.error(f"ChrPower - onReadRequest: {e}")
             callback(Characteristic.RESULT_UNLIKELY_ERROR, None)
+    
+    def onSubscribe(self, maxValueSize, updateValueCallback):
+        print('EchoCharacteristic - onSubscribe')
+        
+        self._updateValueCallback = updateValueCallback
+        self._loop = True
+        
+        # self.loop_get()
+
+    def onUnsubscribe(self):
+        print('EchoCharacteristic - onUnsubscribe');
+        
+        self._loop = False
+        self._updateValueCallback = None
 
     @staticmethod
     def get_power():
         # TODO: Implement this method
         battery = psutil.sensors_battery()
         return battery.percent
+    
+    def loop_get(self):
+        pass
+        # while self._loop:
+        #     self._value = bytes(str(self.get_ram_usage()), "utf8")
+        #     if self._updateValueCallback:
+        #         self._updateValueCallback(self._value)
+        #     time.sleep(10)
 
 
 class ChrRamUsage(Characteristic):
@@ -136,6 +207,8 @@ class ChrRamUsage(Characteristic):
             },
         )
         self._value = None
+        self._loop = False
+        self._updateValueCallback = None
 
     def onReadRequest(self, offset, callback):
         try:
@@ -146,11 +219,32 @@ class ChrRamUsage(Characteristic):
         except Exception as e:
             logger.error(f"ChrRAMUsage - onReadRequest: {e}")
             callback(Characteristic.RESULT_UNLIKELY_ERROR, None)
+    
+    def onSubscribe(self, maxValueSize, updateValueCallback):
+        print('EchoCharacteristic - onSubscribe')
+        
+        self._updateValueCallback = updateValueCallback
+        self._loop = True
+        
+        self.loop_get()
+
+    def onUnsubscribe(self):
+        print('EchoCharacteristic - onUnsubscribe');
+        
+        self._loop = False
+        self._updateValueCallback = None
 
     @staticmethod
     def get_ram_usage():
         ram_usage = psutil.virtual_memory().percent
         return ram_usage
+    
+    def loop_get(self):
+        while self._loop:
+            self._value = bytes(str(self.get_ram_usage()), "utf8")
+            if self._updateValueCallback:
+                self._updateValueCallback(self._value)
+            time.sleep(10)
 
 
 class ChrCpuTemperature(Characteristic):
@@ -164,6 +258,8 @@ class ChrCpuTemperature(Characteristic):
             },
         )
         self._value = None
+        self._loop = False
+        self._updateValueCallback = None
 
     def onReadRequest(self, offset, callback):
         try:
@@ -175,6 +271,20 @@ class ChrCpuTemperature(Characteristic):
         except Exception as e:
             logger.error(f"ChrCpuTemperature - onReadRequest: {e}")
             callback(Characteristic.RESULT_UNLIKELY_ERROR, None)
+    
+    def onSubscribe(self, maxValueSize, updateValueCallback):
+        print('EchoCharacteristic - onSubscribe')
+        
+        self._updateValueCallback = updateValueCallback
+        self._loop = True
+        
+        self.loop_get()
+
+    def onUnsubscribe(self):
+        print('EchoCharacteristic - onUnsubscribe');
+        
+        self._loop = False
+        self._updateValueCallback = None
 
     @staticmethod
     def get_cpu_tempture():
@@ -184,6 +294,13 @@ class ChrCpuTemperature(Characteristic):
                 return round(float(cpu_temp) / 1000, 2)
         except FileNotFoundError:
             return "N/A"
+    
+    def loop_get(self):
+        while self._loop:
+            self._value = bytes(str(self.get_cpu_tempture()), "utf8")
+            if self._updateValueCallback:
+                self._updateValueCallback(self._value)
+            time.sleep(10)
 
 
 class ChrCpuUsage(Characteristic):
@@ -197,6 +314,8 @@ class ChrCpuUsage(Characteristic):
             },
         )
         self._value = None
+        self._updateValueCallback = None
+        self._loop = False
 
     def onReadRequest(self, offset, callback):
         try:
@@ -207,8 +326,30 @@ class ChrCpuUsage(Characteristic):
         except Exception as e:
             logger.error(f"ChrCpuUsage - onReadRequest: {e}")
             callback(Characteristic.RESULT_UNLIKELY_ERROR, None)
+    
+    def onSubscribe(self, maxValueSize, updateValueCallback):
+        print('EchoCharacteristic - onSubscribe')
+        
+        self._updateValueCallback = updateValueCallback
+        self._loop = True
+        
+        self.loop_get()
+
+    def onUnsubscribe(self):
+        print('EchoCharacteristic - onUnsubscribe');
+        
+        self._loop = False
+        self._updateValueCallback = None
 
     @staticmethod
     def get_cpu_usage():
-        cpu_usage = psutil.cpu_percent(interval=1)
+        cpu_usage = psutil.cpu_percent(interval=10)
         return cpu_usage
+    
+    def loop_get(self):
+        while self._loop:
+            self._value = bytes(str(self.get_cpu_usage()), "utf8")
+            if self._updateValueCallback:
+                self._updateValueCallback(self._value)
+            time.sleep(10)
+            

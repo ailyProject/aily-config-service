@@ -20,6 +20,7 @@ class ChrNetwork(Characteristic):
             },
         )
         self._value = None
+        self._updateValueCallback = None
 
     def onReadRequest(self, offset, callback):
         try:
@@ -30,6 +31,24 @@ class ChrNetwork(Characteristic):
         except Exception as e:
             logger.error(f"ChrNetwork - onReadRequest: {e}")
             callback(Characteristic.RESULT_UNLIKELY_ERROR, None)
+    
+    def onSubscribe(self, maxValueSize, updateValueCallback):
+        logger.info('EchoCharacteristic - onSubscribe')
+        
+        self._updateValueCallback = updateValueCallback
+
+    def onUnsubscribe(self):
+        logger.info('EchoCharacteristic - onUnsubscribe');
+        
+        self._updateValueCallback = None
+    
+    def emit_update(self):
+        try:
+            if self._updateValueCallback:
+                self._value = bytes(self.get_network(), "utf-8")
+                self._updateValueCallback(self._value)
+        except Exception as e:
+            logger.error("emitUpdateError: {0}".format(e))
 
     @staticmethod
     def get_network():
@@ -63,6 +82,7 @@ class ChrIP(Characteristic):
             },
         )
         self._value = None
+        self._updateValueCallback = None
 
     @staticmethod
     def get_ip():
@@ -87,10 +107,28 @@ class ChrIP(Characteristic):
         except Exception as e:
             logger.error(f"ChrIP - onReadRequest: {e}")
             callback(Characteristic.RESULT_UNLIKELY_ERROR, None)
+    
+    def onSubscribe(self, maxValueSize, updateValueCallback):
+        logger.info('EchoCharacteristic - onSubscribe')
+        
+        self._updateValueCallback = updateValueCallback
+
+    def onUnsubscribe(self):
+        logger.info('EchoCharacteristic - onUnsubscribe');
+        
+        self._updateValueCallback = None
+    
+    def emit_update(self):
+        try:
+            if self._updateValueCallback:
+                self._value = bytes("11.11.11.11", "utf-8")
+                self._updateValueCallback(self._value)
+        except Exception as e:
+            logger.error("emitUpdateError: {0}".format(e))
 
 
 class ChrWifi(Characteristic):
-    def __init__(self, uuid):
+    def __init__(self, uuid, chr_ip, chr_network):
         Characteristic.__init__(
             self,
             {
@@ -100,13 +138,17 @@ class ChrWifi(Characteristic):
             },
         )
         self._value = None
+        self._updateValueCallback = None
+        
+        self.chr_ip = chr_ip
+        self.chr_network = chr_network
 
     def onReadRequest(self, offset, callback):
         try:
             logger.info(
                 "ChrWifi - onReadRequest: value = " + str(self._value)
             )
-            callback(Characteristic.RESULT_SUCCESS, bytes(self._value))
+            callback(Characteristic.RESULT_SUCCESS, bytes(self._value if self._value else ""))
         except Exception as e:
             logger.error(f"ChrWifi - onReadRequest: {e}")
             callback(Characteristic.RESULT_UNLIKELY_ERROR, None)
@@ -121,6 +163,8 @@ class ChrWifi(Characteristic):
             data = json.loads(self._value.decode("utf-8"))
             result = self.connect(data["ssid"], data["password"])
             if result:
+                ChrIP.emit_update()
+                ChrNetwork.emit_update()
                 callback(Characteristic.RESULT_SUCCESS)
             else:
                 callback(Characteristic.RESULT_UNLIKELY_ERROR)

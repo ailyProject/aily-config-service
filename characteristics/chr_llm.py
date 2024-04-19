@@ -3,7 +3,7 @@ import json
 import yaml
 from pybleno import Characteristic
 from loguru import logger
-from aily import CtlAily
+from aily import AilyCtl
 
 
 class ChrLLMModel(Characteristic):
@@ -35,7 +35,7 @@ class ChrLLMModel(Characteristic):
             logger.info("ChrLLMModel - onWriteRequest: value = " + str(data))
 
             if data:
-                aily = CtlAily()
+                aily = AilyCtl()
                 aily.set_llm_model(data)
 
             callback(Characteristic.RESULT_SUCCESS)
@@ -45,7 +45,7 @@ class ChrLLMModel(Characteristic):
 
     @staticmethod
     def get_llm_model():
-        ctl = CtlAily()
+        ctl = AilyCtl()
         return ctl.get_llm_model()
 
 
@@ -78,7 +78,7 @@ class ChrLLMKey(Characteristic):
             logger.info("ChrLLMKey - onWriteRequest: value = " + str(data))
 
             if data:
-                aily = CtlAily()
+                aily = AilyCtl()
                 aily.set_llm_key(data)
 
             callback(Characteristic.RESULT_SUCCESS)
@@ -88,7 +88,7 @@ class ChrLLMKey(Characteristic):
 
     @staticmethod
     def get_llm_model():
-        ctl = CtlAily()
+        ctl = AilyCtl()
         return ctl.get_llm_key()
 
 
@@ -121,7 +121,7 @@ class ChrLLMPrePrompt(Characteristic):
             logger.info("ChrLLMPrePrompt - onWriteRequest: value = " + str(data))
 
             if data:
-                aily = CtlAily()
+                aily = AilyCtl()
                 aily.set_llm_preprompt(data)
 
             callback(Characteristic.RESULT_SUCCESS)
@@ -131,7 +131,7 @@ class ChrLLMPrePrompt(Characteristic):
 
     @staticmethod
     def get_llm_model():
-        ctl = CtlAily()
+        ctl = AilyCtl()
         return ctl.get_llm_preprompt()
 
 
@@ -164,7 +164,7 @@ class ChrLLMTemp(Characteristic):
             logger.info("ChrLLMTemp - onWriteRequest: value = " + str(data))
 
             if data:
-                aily = CtlAily()
+                aily = AilyCtl()
                 aily.set_llm_preprompt(data)
 
             callback(Characteristic.RESULT_SUCCESS)
@@ -174,7 +174,7 @@ class ChrLLMTemp(Characteristic):
 
     @staticmethod
     def get_llm_model():
-        ctl = CtlAily()
+        ctl = AilyCtl()
         return ctl.get_llm_temp()
 
 
