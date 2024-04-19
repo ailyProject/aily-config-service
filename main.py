@@ -72,6 +72,7 @@ def onAdvertisingStart(error):
                             ChrTTSRole("123e4567-e89b-12d3-a456-00805f9b3506"),
                             ChrTTSModelOptions("123e4567-e89b-12d3-a456-00805f9b3507"),
                             ChrTTSRoleOptions("123e4567-e89b-12d3-a456-00805f9b3508"),
+                            ChrAilyReload("123e4567-e89b-12d3-a456-00805f9b3509")
                         ],
                     }
                 )
