@@ -50,7 +50,7 @@ def onAdvertisingStart(error):
                         "uuid": "123e4567-e89b-12d3-a456-426614174000",
                         "characteristics": [
                             ChrDeviceId("123e4567-e89b-12d3-a456-426614174001"),
-                            ChrModel("123e4567-e89b-12d3-a456-426614174002"),
+                            ChrLLMModel("123e4567-e89b-12d3-a456-426614174002"),
                             ChrNetwork("123e4567-e89b-12d3-a456-426614174003"),
                             ChrIP("123e4567-e89b-12d3-a456-426614174004"),
                             ChrCpuTemperature("123e4567-e89b-12d3-a456-426614174005"),
@@ -59,16 +59,19 @@ def onAdvertisingStart(error):
                             ChrDiskUsage("123e4567-e89b-12d3-a456-426614174008"),
                             ChrBattery("123e4567-e89b-12d3-a456-426614174009"),
                             ChrPower("123e4567-e89b-12d3-a456-426614174010"),
-                            ChrWifiConfiguration(
-                                "123e4567-e89b-12d3-a456-00805f9b34fb"
-                            ),
-                            ChrLLMConfiguration("123e4567-e89b-12d3-a456-00805f9b34fc"),
-                            ChrSTTConfiguration("123e4567-e89b-12d3-a456-00805f9b34fd"),
-                            ChrTTSConfiguration("123e4567-e89b-12d3-a456-00805f9b34fe"),
-                            ChrLLMModels("123e4567-e89b-12d3-a456-00805f9b34ff"),
-                            ChrSTTModels("123e4567-e89b-12d3-a456-00805f9b3500"),
-                            ChrTTSModels("123e4567-e89b-12d3-a456-00805f9b3501"),
-                            ChrTTSRoles("123e4567-e89b-12d3-a456-00805f9b3502"),
+                            ChrWifi("123e4567-e89b-12d3-a456-00805f9b34fb"),
+                            ChrLLMKey("123e4567-e89b-12d3-a456-00805f9b34fd"),
+                            ChrLLMPrePrompt("123e4567-e89b-12d3-a456-00805f9b34fe"),
+                            ChrLLMTemp("123e4567-e89b-12d3-a456-00805f9b34ff"),
+                            ChrLLMModelOptions("123e4567-e89b-12d3-a456-00805f9b3500"),
+                            ChrSttModel("123e4567-e89b-12d3-a456-00805f9b3501"),
+                            ChrSttKey("123e4567-e89b-12d3-a456-00805f9b3502"),
+                            ChrSTTModelOptions("123e4567-e89b-12d3-a456-00805f9b3503"),
+                            ChrTTSModel("123e4567-e89b-12d3-a456-00805f9b3504"),
+                            ChrTTSKey("123e4567-e89b-12d3-a456-00805f9b3505"),
+                            ChrTTSRole("123e4567-e89b-12d3-a456-00805f9b3506"),
+                            ChrTTSModelOptions("123e4567-e89b-12d3-a456-00805f9b3507"),
+                            ChrTTSRoleOptions("123e4567-e89b-12d3-a456-00805f9b3508"),
                         ],
                     }
                 )
