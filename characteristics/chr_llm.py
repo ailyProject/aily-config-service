@@ -22,7 +22,6 @@ class ChrLLMModel(Characteristic):
         try:
             data = self.get_llm_model()
             logger.info("ChrLLMModel - onReadRequest: value = " + str(data))
-            # 获取当前ip地址
             self._value = bytes(data, "utf8")
             callback(Characteristic.RESULT_SUCCESS, self._value)
         except Exception as e:
@@ -42,6 +41,23 @@ class ChrLLMModel(Characteristic):
         except Exception as e:
             logger.error(f"ChrLLMModel - onWriteRequest: {e}")
             callback(Characteristic.RESULT_UNLIKELY_ERROR)
+    
+    def onSubscribe(self, maxValueSize, updateValueCallback):
+        print('EchoCharacteristic - onSubscribe')
+        self._updateValueCallback = updateValueCallback
+        
+        data = self.get_llm_model()
+        logger.info("ChrLLMModel - onReadRequest: value = " + str(data))
+        self._value = bytes(data, "utf8")
+        
+        if self._updateValueCallback:
+            self._updateValueCallback(self._value)
+    
+    def onUnsubscribe(self):
+        print('EchoCharacteristic - onUnsubscribe');
+        
+        self._loop = False
+        self._updateValueCallback = None
 
     @staticmethod
     def get_llm_model():

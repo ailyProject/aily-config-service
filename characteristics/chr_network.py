@@ -7,6 +7,7 @@ import json
 from pybleno import Characteristic
 from loguru import logger
 import re
+import subprocess
 
 
 class ChrNetwork(Characteristic):
@@ -36,6 +37,8 @@ class ChrNetwork(Characteristic):
         logger.info('EchoCharacteristic - onSubscribe')
         
         self._updateValueCallback = updateValueCallback
+        
+        self.emit_update()
 
     def onUnsubscribe(self):
         logger.info('EchoCharacteristic - onUnsubscribe');
@@ -112,6 +115,8 @@ class ChrIP(Characteristic):
         logger.info('EchoCharacteristic - onSubscribe')
         
         self._updateValueCallback = updateValueCallback
+        
+        self.emit_update()
 
     def onUnsubscribe(self):
         logger.info('EchoCharacteristic - onUnsubscribe');
@@ -121,7 +126,7 @@ class ChrIP(Characteristic):
     def emit_update(self):
         try:
             if self._updateValueCallback:
-                self._value = bytes("11.11.11.11", "utf-8")
+                self._value = bytes(self.get_ip(), "utf-8")
                 self._updateValueCallback(self._value)
         except Exception as e:
             logger.error("emitUpdateError: {0}".format(e))
@@ -194,5 +199,5 @@ class ChrWifi(Characteristic):
 
         logger.info("Wifi config added. Refreshing configs")
         ## refresh configs
-        os.popen("sudo wpa_cli -i wlan0 reconfigure")
+        subprocess.check_call(["sudo", "wpa_cli", "-i", "wlan0", "reconfigure"])
         return True
