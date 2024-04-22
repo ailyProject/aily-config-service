@@ -2,10 +2,9 @@ import uuid
 import socket
 import psutil
 import time
+import threading
 from pybleno import Characteristic
 from loguru import logger
-import threading
-import asyncio
 
 
 class ChrDeviceId(Characteristic):
@@ -31,7 +30,7 @@ class ChrDeviceId(Characteristic):
             callback(Characteristic.RESULT_UNLIKELY_ERROR, None)
     
     def onSubscribe(self, maxValueSize, updateValueCallback):
-        logger.info('EchoCharacteristic - onSubscribe')
+        logger.info('ChrDeviceId - onSubscribe')
         self._updateValueCallback = updateValueCallback
         
         hostname = self.get_mac()
@@ -42,7 +41,7 @@ class ChrDeviceId(Characteristic):
             self._updateValueCallback(self._value)
     
     def onUnsubscribe(self):
-        logger.info('EchoCharacteristic - onUnsubscribe');
+        logger.info('ChrDeviceId - onUnsubscribe');
         
         self._loop = False
         self._updateValueCallback = None
@@ -86,18 +85,18 @@ class ChrBattery(Characteristic):
             callback(Characteristic.RESULT_UNLIKELY_ERROR, None)
     
     def onSubscribe(self, maxValueSize, updateValueCallback):
-        logger.info('EchoCharacteristic - onSubscribe')
+        logger.info('ChrBattery - onSubscribe')
         
         self._updateValueCallback = updateValueCallback
         self._loop = True
         
-        if not self._thread:
-            # Start the loop_get method in a new thread
-            self._thread = threading.Thread(target=self.loop_get, daemon=True)
-        self._thread.start()
+        # if not self._thread:
+        #     # Start the loop_get method in a new thread
+        #     self._thread = threading.Thread(target=self.loop_get, daemon=True)
+        # self._thread.start()
 
     def onUnsubscribe(self):
-        logger.info('EchoCharacteristic - onUnsubscribe');
+        logger.info('ChrBattery - onUnsubscribe');
         
         self._loop = False
         self._updateValueCallback = None
@@ -111,12 +110,11 @@ class ChrBattery(Characteristic):
             return "N/A"
     
     def loop_get(self):
-        pass
-        # while self._loop:
-        #     self._value = bytes(str(self.get_battery()), "utf8")
-        #     if self._updateValueCallback:
-        #         self._updateValueCallback(self._value)
-        #     time.sleep(10)
+        while self._loop:
+            self._value = bytes(str(self.get_battery()), "utf8")
+            if self._updateValueCallback:
+                self._updateValueCallback(self._value)
+            time.sleep(10)
 
 
 class ChrDiskUsage(Characteristic):
@@ -145,26 +143,30 @@ class ChrDiskUsage(Characteristic):
             callback(Characteristic.RESULT_UNLIKELY_ERROR, None)
     
     def onSubscribe(self, maxValueSize, updateValueCallback):
-        logger.info('EchoCharacteristic - onSubscribe')
+        logger.info('ChrDiskUsage - onSubscribe')
         
         self._updateValueCallback = updateValueCallback
         self._loop = True
         
-        if not self._thread:
-            # Start the loop_get method in a new thread
-            self._thread = threading.Thread(target=self.loop_get, daemon=True)
-        self._thread.start()
+        # if not self._thread:
+        #     # Start the loop_get method in a new thread
+        #     self._thread = threading.Thread(target=self.loop_get, daemon=True)
+        # self._thread.start()
 
     def onUnsubscribe(self):
-        logger.info('EchoCharacteristic - onUnsubscribe');
+        logger.info('ChrDiskUsage - onUnsubscribe');
         
         self._loop = False
         self._updateValueCallback = None
 
     @staticmethod
     def get_disk_usage():
-        disk_usage = psutil.disk_usage("/").percent
-        return disk_usage
+        try:
+            disk_usage = psutil.disk_usage("/").percent
+            return disk_usage
+        except Exception as e:
+            logger.error("ChrDiskUsage - get_disk_usage: {0}".format(e))
+            return "N/A"
     
     def loop_get(self):
         pass
@@ -201,18 +203,18 @@ class ChrPower(Characteristic):
             callback(Characteristic.RESULT_UNLIKELY_ERROR, None)
     
     def onSubscribe(self, maxValueSize, updateValueCallback):
-        logger.info('EchoCharacteristic - onSubscribe')
+        logger.info('ChrPower - onSubscribe')
         
         self._updateValueCallback = updateValueCallback
         self._loop = True
         
-        if not self._thread:
-            # Start the loop_get method in a new thread
-            self._thread = threading.Thread(target=self.loop_get, daemon=True)
-        self._thread.start()
+        # if not self._thread:
+        #     # Start the loop_get method in a new thread
+        #     self._thread = threading.Thread(target=self.loop_get, daemon=True)
+        # self._thread.start()
 
     def onUnsubscribe(self):
-        logger.info('EchoCharacteristic - onUnsubscribe');
+        logger.info('ChrPower - onUnsubscribe');
         
         self._loop = False
         self._updateValueCallback = None
@@ -227,12 +229,11 @@ class ChrPower(Characteristic):
             return "N/A"
     
     def loop_get(self):
-        pass
-        # while self._loop:
-        #     self._value = bytes(str(self.get_power()), "utf8")
-        #     if self._updateValueCallback:
-        #         self._updateValueCallback(self._value)
-        #     time.sleep(10)
+        while self._loop:
+            self._value = bytes(str(self.get_power()), "utf8")
+            if self._updateValueCallback:
+                self._updateValueCallback(self._value)
+            time.sleep(10)
 
 
 class ChrRamUsage(Characteristic):
@@ -261,18 +262,18 @@ class ChrRamUsage(Characteristic):
             callback(Characteristic.RESULT_UNLIKELY_ERROR, None)
     
     def onSubscribe(self, maxValueSize, updateValueCallback):
-        logger.info('EchoCharacteristic - onSubscribe')
+        logger.info('ChrRamUsage - onSubscribe')
         
         self._updateValueCallback = updateValueCallback
         self._loop = True
         
-        if not self._thread:
-            # Start the loop_get method in a new thread
-            self._thread = threading.Thread(target=self.loop_get, daemon=True)
-        self._thread.start()
+        # if not self._thread:
+        #     # Start the loop_get method in a new thread
+        #     self._thread = threading.Thread(target=self.loop_get, daemon=True)
+        # self._thread.start()
 
     def onUnsubscribe(self):
-        logger.info('EchoCharacteristic - onUnsubscribe');
+        logger.info('ChrRamUsage - onUnsubscribe');
         
         self._loop = False
         self._updateValueCallback = None
@@ -283,12 +284,11 @@ class ChrRamUsage(Characteristic):
         return ram_usage
     
     def loop_get(self):
-        pass
-        # while self._loop:
-        #     self._value = bytes(str(self.get_ram_usage()), "utf8")
-        #     if self._updateValueCallback:
-        #         self._updateValueCallback(self._value)
-        #     time.sleep(10)
+        while self._loop:
+            self._value = bytes(str(self.get_ram_usage()), "utf8")
+            if self._updateValueCallback:
+                self._updateValueCallback(self._value)
+            time.sleep(10)
 
 
 class ChrCpuTemperature(Characteristic):
@@ -317,19 +317,19 @@ class ChrCpuTemperature(Characteristic):
             callback(Characteristic.RESULT_UNLIKELY_ERROR, None)
     
     def onSubscribe(self, maxValueSize, updateValueCallback):
-        logger.info('EchoCharacteristic - onSubscribe')
+        logger.info('ChrCpuTemperature - onSubscribe')
             
         self._updateValueCallback = updateValueCallback
         self._loop = True
         
-        if not self._thread:
-            # Start the loop_get method in a new thread
-            self._thread = threading.Thread(target=self.loop_get, daemon=True)
-        self._thread.start()
+        # if not self._thread:
+        #     # Start the loop_get method in a new thread
+        #     self._thread = threading.Thread(target=self.loop_get, daemon=True)
+        # self._thread.start()
             
 
     def onUnsubscribe(self):
-        logger.info('EchoCharacteristic - onUnsubscribe');
+        logger.info('ChrCpuTemperature - onUnsubscribe');
         
         self._loop = False
         self._updateValueCallback = None
@@ -344,13 +344,12 @@ class ChrCpuTemperature(Characteristic):
             return "N/A"
     
     def loop_get(self):
-        pass
-        # while self._loop:
-        #     temp = self.get_cpu_tempture()
-        #     self._value = bytes(str(temp), "utf8")
-        #     if self._updateValueCallback:
-        #         self._updateValueCallback(self._value)
-        #     time.sleep(10)
+        while self._loop:
+            temp = self.get_cpu_tempture()
+            self._value = bytes(str(temp), "utf8")
+            if self._updateValueCallback:
+                self._updateValueCallback(self._value)
+            time.sleep(10)
 
 
 class ChrCpuUsage(Characteristic):
@@ -380,18 +379,18 @@ class ChrCpuUsage(Characteristic):
             callback(Characteristic.RESULT_UNLIKELY_ERROR, None)
     
     def onSubscribe(self, maxValueSize, updateValueCallback):
-        logger.info('EchoCharacteristic - onSubscribe')
+        logger.info('ChrCpuUsage - onSubscribe')
         
         self._updateValueCallback = updateValueCallback
         self._loop = True
         
-        if not self._thread:
-            # Start the loop_get method in a new thread
-            self._thread = threading.Thread(target=self.loop_get, daemon=True)
-        self._thread.start()
+        # if not self._thread:
+        #     # Start the loop_get method in a new thread
+        #     self._thread = threading.Thread(target=self.loop_get, daemon=True)
+        # self._thread.start()
 
     def onUnsubscribe(self):
-        logger.info('EchoCharacteristic - onUnsubscribe');
+        logger.info('ChrCpuUsage - onUnsubscribe');
         
         self._loop = False
         self._updateValueCallback = None
@@ -407,6 +406,7 @@ class ChrCpuUsage(Characteristic):
     def loop_get(self):
         while self._loop:
             self._value = bytes(str(self.get_cpu_usage()), "utf8")
+            logger.info("ChrCpuUsage - loop_get - {0}".format(self._value))
             if self._updateValueCallback:
                 self._updateValueCallback(self._value)
             time.sleep(10)

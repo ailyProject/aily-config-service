@@ -61,8 +61,11 @@ class ChrLLMModel(Characteristic):
 
     @staticmethod
     def get_llm_model():
-        ctl = AilyCtl()
-        return ctl.get_llm_model()
+        try:
+            ctl = AilyCtl()
+            return ctl.get_llm_model()
+        except Exception as e:
+            return "N/A"
 
 
 class ChrLLMKey(Characteristic):
@@ -104,8 +107,11 @@ class ChrLLMKey(Characteristic):
 
     @staticmethod
     def get_llm_model():
-        ctl = AilyCtl()
-        return ctl.get_llm_key()
+        try:
+            ctl = AilyCtl()
+            return ctl.get_llm_key()
+        except Exception as e:
+            return "N/A"
 
 
 class ChrLLMPrePrompt(Characteristic):
@@ -147,8 +153,11 @@ class ChrLLMPrePrompt(Characteristic):
 
     @staticmethod
     def get_llm_model():
-        ctl = AilyCtl()
-        return ctl.get_llm_preprompt()
+        try:
+            ctl = AilyCtl()
+            return ctl.get_llm_preprompt()
+        except Exception as e:
+            return "N/A"
 
 
 class ChrLLMTemp(Characteristic):
@@ -190,8 +199,11 @@ class ChrLLMTemp(Characteristic):
 
     @staticmethod
     def get_llm_model():
-        ctl = AilyCtl()
-        return ctl.get_llm_temp()
+        try:
+            ctl = AilyCtl()
+            return ctl.get_llm_temp()
+        except Exception as e:
+            return "N/A"
 
 
 class ChrLLMModelOptions(Characteristic):
@@ -218,7 +230,11 @@ class ChrLLMModelOptions(Characteristic):
 
     @staticmethod
     def get_conf():
-        conf_file = os.getenv("AILY_CONFIG_PATH")
-        with open(conf_file, "r") as f:
-            conf = yaml.safe_load(f)
-        return json.dumps(conf["llm"]["models"])
+        try:
+            conf_file = os.getenv("AILY_CONFIG_PATH")
+            with open(conf_file, "r") as f:
+                conf = yaml.safe_load(f)
+            return json.dumps(conf["llm"]["models"])
+        except Exception as e:
+            logger.error(f"ChrLLMModels - get_conf: {e}")
+            return "N/A"

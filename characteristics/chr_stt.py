@@ -108,7 +108,11 @@ class ChrSTTModelOptions(Characteristic):
 
     @staticmethod
     def get_conf():
-        conf_file = os.getenv("AILY_CONFIG_PATH")
-        with open(conf_file, "r") as f:
-            conf = yaml.safe_load(f)
-        return json.dumps(conf["stt"]["models"])
+        try:
+            conf_file = os.getenv("AILY_CONFIG_PATH")
+            with open(conf_file, "r") as f:
+                conf = yaml.safe_load(f)
+            return json.dumps(conf["stt"]["models"])
+        except Exception as e:
+            logger.error(f"ChrSTTModelOptions - get_conf: {e}")
+            return "N/A"

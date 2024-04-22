@@ -147,10 +147,13 @@ class ChrTTSModelOptions(Characteristic):
 
     @staticmethod
     def get_conf():
-        conf_file = os.getenv("AILY_CONFIG_PATH")
-        with open(conf_file, "r") as f:
-            conf = yaml.safe_load(f)
-        return json.dumps(conf["tts"]["models"])
+        try:
+            conf_file = os.getenv("AILY_CONFIG_PATH")
+            with open(conf_file, "r") as f:
+                conf = yaml.safe_load(f)
+            return json.dumps(conf["tts"]["models"])
+        except Exception as e:
+            return "N/A"
 
 
 class ChrTTSRoleOptions(Characteristic):
@@ -177,7 +180,10 @@ class ChrTTSRoleOptions(Characteristic):
 
     @staticmethod
     def get_conf():
-        conf_file = os.getenv("AILY_CONFIG_PATH")
-        with open(conf_file, "r") as f:
-            conf = yaml.safe_load(f)
-        return json.dumps(conf["tts"]["roles"])
+        try:
+            conf_file = os.getenv("AILY_CONFIG_PATH")
+            with open(conf_file, "r") as f:
+                conf = yaml.safe_load(f)
+            return json.dumps(conf["tts"]["roles"])
+        except Exception as e:
+            return "N/A"

@@ -11,7 +11,8 @@ load_dotenv(".env")
 from characteristics import *
 
 
-os.environ["AILY_CONFIG_PATH"] = os.path.abspath(os.environ.get("AILY_CONFIG_PATH"))
+if os.environ.get("AILY_CONFIG_PATH"):
+    os.environ["AILY_CONFIG_PATH"] = os.path.abspath(os.environ.get("AILY_CONFIG_PATH"))
 
 
 logger.add(
@@ -122,34 +123,24 @@ def unsubscribed():
     chr_disk_usage.onUnsubscribe()
     chr_battery.onUnsubscribe()
     chr_power.onUnsubscribe()
-    chr_wifi.onUnsubscribe()
-    chr_llm_key.onUnsubscribe()
-    chr_llm_pre_prompt.onUnsubscribe()
-    chr_llm_temp.onUnsubscribe()
-    chr_llm_model_options.onUnsubscribe()
-    chr_stt_model.onUnsubscribe()
-    chr_stt_key.onUnsubscribe()
-    chr_stt_model_options.onUnsubscribe()
-    chr_tts_model.onUnsubscribe()
-    chr_tts_key.onUnsubscribe()
-    chr_tts_role.onUnsubscribe()
-    chr_tts_model_options.onUnsubscribe()
-    chr_tts_role_options.onUnsubscribe()
-    chr_aily_reload.onUnsubscribe()
 
 
+bleno.on("advertisingStop", unsubscribed)
 bleno.on("disconnect", unsubscribed)
 
-bleno.start()
-
 try:
-    loop = asyncio.get_event_loop()
-    loop.run_forever()
-except KeyboardInterrupt:
-    logger.info("Keyboard interrupt detected")
+    bleno.start()
 
-bleno.stopAdvertising()
-bleno.disconnect()
+    try:
+        loop = asyncio.get_event_loop()
+        loop.run_forever()
+    except KeyboardInterrupt:
+        logger.info("Keyboard interrupt detected")
+except Exception as e:
+    logger.error(f"Bleno service error: {e}")
+finally:
+    bleno.stopAdvertising()
+    bleno.disconnect()
 
-logger.info("terminated.")
-sys.exit(1)
+    logger.info("terminated.")
+    sys.exit(1)
