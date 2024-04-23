@@ -3,11 +3,13 @@ import socket
 import array
 import os
 import json
+import time
 
 from pybleno import Characteristic
 from loguru import logger
 import re
 import subprocess
+import threading
 
 
 class ChrNetwork(Characteristic):
@@ -38,7 +40,7 @@ class ChrNetwork(Characteristic):
         
         self._updateValueCallback = updateValueCallback
         
-        self.emit_update()
+        # self.emit_update()
 
     def onUnsubscribe(self):
         logger.info('EchoCharacteristic - onUnsubscribe');
@@ -48,7 +50,17 @@ class ChrNetwork(Characteristic):
     def emit_update(self):
         try:
             if self._updateValueCallback:
-                self._value = bytes(self.get_network(), "utf-8")
+                # value = self.get_network()
+                while_count = 5
+                while while_count > 0:
+                    value = self.get_network()
+                    if value != "UNKNOWN":
+                        break
+                    time.sleep(2)
+                    while_count -= 1
+
+                logger.info("ChrNetwork - emit_update: {0}".format(value))
+                self._value = bytes(value, "utf-8")
                 self._updateValueCallback(self._value)
         except Exception as e:
             logger.error("emitUpdateError: {0}".format(e))
@@ -57,16 +69,15 @@ class ChrNetwork(Characteristic):
     def get_network():
         net_status_list = psutil.net_if_stats()
         # 当前网络接口
-        current_net = None
+        
+        current_net = "UNKNOWN"
         for key, value in net_status_list.items():
             if re.match(r"^lo", key):
                 continue
             if value.isup:
                 current_net = key
 
-        if current_net is None:
-            return "None"
-        elif re.match(r"^wlan", current_net):
+        if re.match(r"^wlan", current_net):
             return "WiFi"
         elif re.match(r"^eth", current_net):
             return "Wired"
@@ -116,7 +127,7 @@ class ChrIP(Characteristic):
         
         self._updateValueCallback = updateValueCallback
         
-        self.emit_update()
+        # self.emit_update()
 
     def onUnsubscribe(self):
         logger.info('EchoCharacteristic - onUnsubscribe');
@@ -126,7 +137,15 @@ class ChrIP(Characteristic):
     def emit_update(self):
         try:
             if self._updateValueCallback:
-                self._value = bytes(self.get_ip(), "utf-8")
+                while_count = 5
+                while while_count > 0:
+                    value = self.get_ip()
+                    if value != "UNKNOWN" and value != self._value.decode("utf-8"):
+                        break
+                    time.sleep(5)
+                    while_count -= 1
+                logger.info("ChrIP - emit_update: {0}".format(value))
+                self._value = bytes(value, "utf-8")
                 self._updateValueCallback(self._value)
         except Exception as e:
             logger.error("emitUpdateError: {0}".format(e))
@@ -166,19 +185,21 @@ class ChrWifi(Characteristic):
                 + self._value.decode("utf-8")
             )
             data = json.loads(self._value.decode("utf-8"))
-            result = self.connect(data["ssid"], data["password"])
-            if result:
-                ChrIP.emit_update()
-                ChrNetwork.emit_update()
-                callback(Characteristic.RESULT_SUCCESS)
-            else:
-                callback(Characteristic.RESULT_UNLIKELY_ERROR)
+            t = threading.Thread(
+                target=self.connect, args=(data["ssid"], data["password"])
+            )
+            t.start()
+            callback(Characteristic.RESULT_SUCCESS)
         except Exception as e:
             logger.error(f"ChrWifi - onWriteRequest: {e}")
             callback(Characteristic.RESULT_UNLIKELY_ERROR)
+    
+    def emit_update(self):
+        time.sleep(5)
+        self.chr_ip.emit_update()
+        self.chr_network.emit_update()
 
-    @staticmethod
-    def connect(ssid, password):
+    def connect(self, ssid, password):
         config_lines = [
             "ctrl_interface=DIR=/var/run/wpa_supplicant GROUP=netdev",
             "update_config=1",
@@ -200,4 +221,5 @@ class ChrWifi(Characteristic):
         logger.info("Wifi config added. Refreshing configs")
         ## refresh configs
         subprocess.check_call(["sudo", "wpa_cli", "-i", "wlan0", "reconfigure"])
+        self.emit_update()
         return True

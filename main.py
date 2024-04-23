@@ -111,36 +111,22 @@ def onAdvertisingStart(error):
 bleno.on("advertisingStart", onAdvertisingStart)
 
 
-def unsubscribed():
-    logger.info("on -> unsubscribed")
-    chr_device_id.onUnsubscribe()
-    chr_llm_model.onUnsubscribe()
-    chr_network.onUnsubscribe()
-    chr_ip.onUnsubscribe()
-    chr_cpu_temp.onUnsubscribe()
-    chr_cpu_usage.onUnsubscribe()
-    chr_ram_usage.onUnsubscribe()
-    chr_disk_usage.onUnsubscribe()
-    chr_battery.onUnsubscribe()
-    chr_power.onUnsubscribe()
-
-
-bleno.on("advertisingStop", unsubscribed)
-bleno.on("disconnect", unsubscribed)
-
 try:
     bleno.start()
-
-    try:
-        loop = asyncio.get_event_loop()
-        loop.run_forever()
-    except KeyboardInterrupt:
-        logger.info("Keyboard interrupt detected")
+    input("Press <Enter> to stop the program\n")
+except KeyboardInterrupt:
+    logger.info("Keyboard interrupt detected")
 except Exception as e:
     logger.error(f"Bleno service error: {e}")
 finally:
     bleno.stopAdvertising()
     bleno.disconnect()
+    chr_cpu_usage.stop()
+    chr_cpu_temp.stop()
+    chr_ram_usage.stop()
+    chr_disk_usage.stop()
+    chr_battery.stop()
+    chr_power.stop()
 
     logger.info("terminated.")
     sys.exit(1)

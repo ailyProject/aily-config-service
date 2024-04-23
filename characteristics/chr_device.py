@@ -30,19 +30,19 @@ class ChrDeviceId(Characteristic):
             callback(Characteristic.RESULT_UNLIKELY_ERROR, None)
     
     def onSubscribe(self, maxValueSize, updateValueCallback):
-        logger.info('ChrDeviceId - onSubscribe')
+        logger.info("ChrDeviceId - onSubscribe")
         self._updateValueCallback = updateValueCallback
-        
+
         hostname = self.get_mac()
         logger.info("ChrDeviceId - onReadRequest: value = " + hostname)
         self._value = bytes(hostname, "utf8")
-        
+
         if self._updateValueCallback:
             self._updateValueCallback(self._value)
-    
+
     def onUnsubscribe(self):
-        logger.info('ChrDeviceId - onUnsubscribe');
-        
+        logger.info("ChrDeviceId - onUnsubscribe")
+
         self._loop = False
         self._updateValueCallback = None
 
@@ -55,7 +55,7 @@ class ChrDeviceId(Characteristic):
         # 获取 MAC 地址
         mac = uuid.getnode()
         # 转换为常见的 MAC 地址格式
-        mac_address = ''.join(('%012X' % mac)[i:i+2] for i in range(0, 12, 2))
+        mac_address = "".join(("%012X" % mac)[i : i + 2] for i in range(0, 12, 2))
         return mac_address
 
 
@@ -72,7 +72,12 @@ class ChrBattery(Characteristic):
         self._value = None
         self._loop = False
         self._updateValueCallback = None
-        self._thread = None
+        self._timer = None
+        # self._stop_event = threading.Event()
+
+    def stop(self):
+        # self._stop_event.set()
+        self._loop = False
 
     def onReadRequest(self, offset, callback):
         try:
@@ -83,23 +88,34 @@ class ChrBattery(Characteristic):
         except Exception as e:
             logger.error(f"ChrBattery - onReadRequest: {e}")
             callback(Characteristic.RESULT_UNLIKELY_ERROR, None)
-    
+
     def onSubscribe(self, maxValueSize, updateValueCallback):
-        logger.info('ChrBattery - onSubscribe')
-        
+        logger.info("ChrBattery - onSubscribe")
+
         self._updateValueCallback = updateValueCallback
         self._loop = True
-        
-        # if not self._thread:
-        #     # Start the loop_get method in a new thread
-        #     self._thread = threading.Thread(target=self.loop_get, daemon=True)
-        # self._thread.start()
+        self.start_sending()
+
+        # threading.Thread(target=self.loop_get, daemon=True).start()
 
     def onUnsubscribe(self):
-        logger.info('ChrBattery - onUnsubscribe');
-        
+        logger.info("ChrBattery - onUnsubscribe")
+
         self._loop = False
         self._updateValueCallback = None
+        self.stop_sending()
+    
+    def start_sending(self, interval=600):
+        if self._timer is not None:
+            self._timer.cancel()
+
+        self._timer = threading.Timer(interval, self.loop_get)
+        self._timer.start()
+
+    def stop_sending(self):
+        if self._timer is not None:
+            self._timer.cancel()
+        self._timer = None
 
     @staticmethod
     def get_battery():
@@ -108,13 +124,25 @@ class ChrBattery(Characteristic):
             return battery.percent
         except Exception as e:
             return "N/A"
-    
+
     def loop_get(self):
-        while self._loop:
-            self._value = bytes(str(self.get_battery()), "utf8")
-            if self._updateValueCallback:
-                self._updateValueCallback(self._value)
-            time.sleep(10)
+        if self._updateValueCallback is None:
+            return
+
+        self._value = bytes(str(self.get_battery()), "utf8")
+        if self._value:
+            self._updateValueCallback(self._value)
+
+        self.start_sending()
+
+        # while not self._stop_event.is_set() and self._loop:
+        #     self._value = bytes(str(self.get_battery()), "utf8")
+        #     if self._updateValueCallback:
+        #         try:
+        #             self._updateValueCallback(self._value)
+        #         except Exception as e:
+        #             logger.error(f"ChrBattery - loop_get: {e}")
+        #     time.sleep(20)
 
 
 class ChrDiskUsage(Characteristic):
@@ -130,7 +158,11 @@ class ChrDiskUsage(Characteristic):
         self._value = None
         self._loop = False
         self._updateValueCallback = None
-        self._thread = None
+        self._timer = None
+
+    def stop(self):
+        # self._stop_event.set()
+        self._loop = False
 
     def onReadRequest(self, offset, callback):
         try:
@@ -141,23 +173,34 @@ class ChrDiskUsage(Characteristic):
         except Exception as e:
             logger.error(f"ChrDiskUsage - onReadRequest: {e}")
             callback(Characteristic.RESULT_UNLIKELY_ERROR, None)
-    
+
     def onSubscribe(self, maxValueSize, updateValueCallback):
-        logger.info('ChrDiskUsage - onSubscribe')
-        
+        logger.info("ChrDiskUsage - onSubscribe")
+
         self._updateValueCallback = updateValueCallback
         self._loop = True
-        
-        # if not self._thread:
-        #     # Start the loop_get method in a new thread
-        #     self._thread = threading.Thread(target=self.loop_get, daemon=True)
-        # self._thread.start()
+        self.start_sending()
+
+        # threading.Thread(target=self.loop_get, daemon=True).start()
 
     def onUnsubscribe(self):
-        logger.info('ChrDiskUsage - onUnsubscribe');
-        
+        logger.info("ChrDiskUsage - onUnsubscribe")
+
         self._loop = False
         self._updateValueCallback = None
+        self.stop_sending()
+    
+    def start_sending(self, interval=120):
+        if self._timer is not None:
+            self._timer.cancel()
+
+        self._timer = threading.Timer(interval, self.loop_get)
+        self._timer.start()
+
+    def stop_sending(self):
+        if self._timer is not None:
+            self._timer.cancel()
+        self._timer = None
 
     @staticmethod
     def get_disk_usage():
@@ -167,14 +210,26 @@ class ChrDiskUsage(Characteristic):
         except Exception as e:
             logger.error("ChrDiskUsage - get_disk_usage: {0}".format(e))
             return "N/A"
-    
+
     def loop_get(self):
-        pass
-        # while self._loop:
+        if self._updateValueCallback is None:
+            return
+
+        self._value = bytes(str(self.get_disk_usage()), "utf8")
+        if self._value:
+            self._updateValueCallback(self._value)
+
+        self.start_sending()
+
+        # while not self._stop_event.is_set() and self._loop:
         #     self._value = bytes(str(self.get_disk_usage()), "utf8")
+        #     logger.info("DiskUsage: " + str(self._value))
         #     if self._updateValueCallback:
-        #         self._updateValueCallback(self._value)
-        #     time.sleep(10)
+        #         try:
+        #             self._updateValueCallback(self._value)
+        #         except Exception as e:
+        #             logger.error(f"ChrDiskUsage - loop_get: {e}")
+        #     time.sleep(20)
 
 
 class ChrPower(Characteristic):
@@ -190,7 +245,11 @@ class ChrPower(Characteristic):
         self._value = None
         self._loop = False
         self._updateValueCallback = None
-        self._thread = None
+        self._timer = None
+
+    def stop(self):
+        # self._stop_event.set()
+        self._loop = False
 
     def onReadRequest(self, offset, callback):
         try:
@@ -201,23 +260,34 @@ class ChrPower(Characteristic):
         except Exception as e:
             logger.error(f"ChrPower - onReadRequest: {e}")
             callback(Characteristic.RESULT_UNLIKELY_ERROR, None)
-    
+
     def onSubscribe(self, maxValueSize, updateValueCallback):
-        logger.info('ChrPower - onSubscribe')
-        
+        logger.info("ChrPower - onSubscribe")
+
         self._updateValueCallback = updateValueCallback
         self._loop = True
-        
-        # if not self._thread:
-        #     # Start the loop_get method in a new thread
-        #     self._thread = threading.Thread(target=self.loop_get, daemon=True)
-        # self._thread.start()
+        # self.start_sending()
+
+        # threading.Thread(target=self.loop_get, daemon=True).start()
 
     def onUnsubscribe(self):
-        logger.info('ChrPower - onUnsubscribe');
-        
+        logger.info("ChrPower - onUnsubscribe")
+
         self._loop = False
         self._updateValueCallback = None
+        self.stop_sending()
+    
+    def start_sending(self, interval=300):
+        if self._timer is not None:
+            self._timer.cancel()
+
+        self._timer = threading.Timer(interval, self.loop_get)
+        self._timer.start()
+
+    def stop_sending(self):
+        if self._timer is not None:
+            self._timer.cancel()
+        self._timer = None
 
     @staticmethod
     def get_power():
@@ -227,13 +297,25 @@ class ChrPower(Characteristic):
             return battery.percent
         except Exception as e:
             return "N/A"
-    
+
     def loop_get(self):
-        while self._loop:
-            self._value = bytes(str(self.get_power()), "utf8")
-            if self._updateValueCallback:
-                self._updateValueCallback(self._value)
-            time.sleep(10)
+        if self._updateValueCallback is None:
+            return
+
+        self._value = bytes(str(self.get_power()), "utf8")
+        if self._value:
+            self._updateValueCallback(self._value)
+
+        self.start_sending()
+
+        # while not self._stop_event.is_set() and self._loop:
+        #     self._value = bytes(str(self.get_power()), "utf8")
+        #     if self._updateValueCallback:
+        #         try:
+        #             self._updateValueCallback(self._value)
+        #         except Exception as e:
+        #             logger.error(f"ChrPower - loop_get: {e}")
+        #     time.sleep(20)
 
 
 class ChrRamUsage(Characteristic):
@@ -249,7 +331,12 @@ class ChrRamUsage(Characteristic):
         self._value = None
         self._loop = False
         self._updateValueCallback = None
-        self._thread = None
+        self._timer = None
+        # self._stop_event = threading.Event()
+
+    def stop(self):
+        # self._stop_event.set()
+        self._loop = False
 
     def onReadRequest(self, offset, callback):
         try:
@@ -260,35 +347,58 @@ class ChrRamUsage(Characteristic):
         except Exception as e:
             logger.error(f"ChrRAMUsage - onReadRequest: {e}")
             callback(Characteristic.RESULT_UNLIKELY_ERROR, None)
-    
+
     def onSubscribe(self, maxValueSize, updateValueCallback):
-        logger.info('ChrRamUsage - onSubscribe')
-        
+        logger.info("ChrRamUsage - onSubscribe")
+
         self._updateValueCallback = updateValueCallback
         self._loop = True
-        
-        # if not self._thread:
-        #     # Start the loop_get method in a new thread
-        #     self._thread = threading.Thread(target=self.loop_get, daemon=True)
-        # self._thread.start()
+        self.start_sending()
+
+        # threading.Thread(target=self.loop_get, daemon=True).start()
 
     def onUnsubscribe(self):
-        logger.info('ChrRamUsage - onUnsubscribe');
-        
+        logger.info("ChrRamUsage - onUnsubscribe")
+
         self._loop = False
         self._updateValueCallback = None
+        self.stop_sending()
+    
+    def start_sending(self, interval=30):
+        if self._timer is not None:
+            self._timer.cancel()
+
+        self._timer = threading.Timer(interval, self.loop_get)
+        self._timer.start()
+
+    def stop_sending(self):
+        if self._timer is not None:
+            self._timer.cancel()
+        self._timer = None
 
     @staticmethod
     def get_ram_usage():
         ram_usage = psutil.virtual_memory().percent
         return ram_usage
-    
+
     def loop_get(self):
-        while self._loop:
-            self._value = bytes(str(self.get_ram_usage()), "utf8")
-            if self._updateValueCallback:
-                self._updateValueCallback(self._value)
-            time.sleep(10)
+        if self._updateValueCallback is None:
+            return
+
+        self._value = bytes(str(self.get_ram_usage()), "utf8")
+        if self._value:
+            self._updateValueCallback(self._value)
+
+        self.start_sending()
+
+        # while not self._stop_event.is_set() and self._loop:
+        #     self._value = bytes(str(self.get_ram_usage()), "utf8")
+        #     if self._updateValueCallback:
+        #         try:
+        #             self._updateValueCallback(self._value)
+        #         except Exception as e:
+        #             logger.error(f"ChrRamUsage - loop_get: {e}")
+        #     time.sleep(10)
 
 
 class ChrCpuTemperature(Characteristic):
@@ -304,7 +414,12 @@ class ChrCpuTemperature(Characteristic):
         self._value = None
         self._loop = False
         self._updateValueCallback = None
-        self._thread = None
+        self._timer = None
+        # self._stop_event = threading.Event()
+
+    def stop(self):
+        # self._stop_event.set()
+        self._loop = False
 
     def onReadRequest(self, offset, callback):
         try:
@@ -315,24 +430,34 @@ class ChrCpuTemperature(Characteristic):
         except Exception as e:
             logger.error(f"ChrCpuTemperature - onReadRequest: {e}")
             callback(Characteristic.RESULT_UNLIKELY_ERROR, None)
-    
+
     def onSubscribe(self, maxValueSize, updateValueCallback):
-        logger.info('ChrCpuTemperature - onSubscribe')
-            
+        logger.info("ChrCpuTemperature - onSubscribe")
+
         self._updateValueCallback = updateValueCallback
         self._loop = True
-        
-        # if not self._thread:
-        #     # Start the loop_get method in a new thread
-        #     self._thread = threading.Thread(target=self.loop_get, daemon=True)
-        # self._thread.start()
-            
+        self.start_sending()
+
+        # threading.Thread(target=self.loop_get, daemon=True).start()
 
     def onUnsubscribe(self):
-        logger.info('ChrCpuTemperature - onUnsubscribe');
-        
+        logger.info("ChrCpuTemperature - onUnsubscribe")
+
         self._loop = False
         self._updateValueCallback = None
+        self.stop_sending()
+    
+    def start_sending(self, interval=60):
+        if self._timer is not None:
+            self._timer.cancel()
+
+        self._timer = threading.Timer(interval, self.loop_get)
+        self._timer.start()
+
+    def stop_sending(self):
+        if self._timer is not None:
+            self._timer.cancel()
+        self._timer = None
 
     @staticmethod
     def get_cpu_tempture():
@@ -342,14 +467,16 @@ class ChrCpuTemperature(Characteristic):
                 return round(float(cpu_temp) / 1000, 2)
         except FileNotFoundError:
             return "N/A"
-    
+
     def loop_get(self):
-        while self._loop:
-            temp = self.get_cpu_tempture()
-            self._value = bytes(str(temp), "utf8")
-            if self._updateValueCallback:
-                self._updateValueCallback(self._value)
-            time.sleep(10)
+        if self._updateValueCallback is None:
+            return
+
+        self._value = bytes(str(self.get_cpu_tempture()), "utf8")
+        if self._value:
+            self._updateValueCallback(self._value)
+
+        self.start_sending()
 
 
 class ChrCpuUsage(Characteristic):
@@ -365,8 +492,15 @@ class ChrCpuUsage(Characteristic):
         self._value = None
         self._updateValueCallback = None
         self._loop = False
-        
+
+        self._stop_event = threading.Event()
+
         self._thread = None
+        self._timer = None
+
+    def stop(self):
+        # self._stop_event.set()
+        self._loop = False
 
     def onReadRequest(self, offset, callback):
         try:
@@ -377,37 +511,49 @@ class ChrCpuUsage(Characteristic):
         except Exception as e:
             logger.error(f"ChrCpuUsage - onReadRequest: {e}")
             callback(Characteristic.RESULT_UNLIKELY_ERROR, None)
-    
+
     def onSubscribe(self, maxValueSize, updateValueCallback):
-        logger.info('ChrCpuUsage - onSubscribe')
-        
+        logger.info("ChrCpuUsage - onSubscribe")
+
         self._updateValueCallback = updateValueCallback
         self._loop = True
-        
-        # if not self._thread:
-        #     # Start the loop_get method in a new thread
-        #     self._thread = threading.Thread(target=self.loop_get, daemon=True)
-        # self._thread.start()
+        self.start_sending()
+
+        # threading.Thread(target=self.loop_get, daemon=True).start()
 
     def onUnsubscribe(self):
-        logger.info('ChrCpuUsage - onUnsubscribe');
-        
+        logger.info("ChrCpuUsage - onUnsubscribe")
+
         self._loop = False
         self._updateValueCallback = None
+        self.stop_sending()
 
     @staticmethod
     def get_cpu_usage():
         try:
-            cpu_usage = psutil.cpu_percent(interval=10)
+            cpu_usage = psutil.cpu_percent(interval=1)
             return cpu_usage
         except Exception as e:
             return "N/A"
-    
+
+    def start_sending(self, interval=20):
+        if self._timer is not None:
+            self._timer.cancel()
+
+        self._timer = threading.Timer(interval, self.loop_get)
+        self._timer.start()
+
+    def stop_sending(self):
+        if self._timer is not None:
+            self._timer.cancel()
+        self._timer = None
+
     def loop_get(self):
-        while self._loop:
-            self._value = bytes(str(self.get_cpu_usage()), "utf8")
-            logger.info("ChrCpuUsage - loop_get - {0}".format(self._value))
-            if self._updateValueCallback:
-                self._updateValueCallback(self._value)
-            time.sleep(10)
-            
+        if self._updateValueCallback is None:
+            return
+
+        self._value = bytes(str(self.get_cpu_usage()), "utf8")
+        if self._value:
+            self._updateValueCallback(self._value)
+
+        self.start_sending()
