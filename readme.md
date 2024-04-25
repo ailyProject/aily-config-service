@@ -1,6 +1,18 @@
 # aily-config-service
 运行在Linux上的配置服务
 
+
+## 环境参数配置
+> 需要手动配置下aliy服务的相关信息, 复制 `.env.sample`文件为 `.env`
+
+- AILY_PATH: aily服务所在的文件夹
+- AILY_ENV_PATH: aily服务环境配置文件的位置
+- AILY_SUPERVISOR_NAME: 在supervisor中配置的aily服务名
+
+```
+cp .env.sample .env
+```
+
 ## 部署
 ### 自动部署
 ```

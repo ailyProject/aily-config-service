@@ -4,6 +4,8 @@ llm:
       value: gpt-3.5-turbo
     - name: chatGPT-gpt-4-turbo
       value: gpt-4-turbo
+    - name: yi-34b-chat
+      value: yi-34b-chat-0205
 
 stt:
   models:
