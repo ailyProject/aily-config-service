@@ -184,6 +184,7 @@ class ChrTTSRoleOptions(Characteristic):
             conf_file = os.getenv("AILY_CONFIG_PATH")
             with open(conf_file, "r") as f:
                 conf = yaml.safe_load(f)
-            return json.dumps(conf["tts"]["roles"])
+            return json.dumps([])
+            # return json.dumps(conf["tts"]["roles"])
         except Exception as e:
             return "N/A"

@@ -37,7 +37,7 @@ class ChrAilyConversation(Characteristic):
             self,
             {
                 "uuid": uuid,
-                "properties": ["read", "notify"],
+                "properties": ["notify"],
                 "value": None,
             },
         )
@@ -49,9 +49,7 @@ class ChrAilyConversation(Characteristic):
     def onReadRequest(self, offset, callback):
         try:
             record = self.get_logs()
-            logger.info(
-                "ChrAilyConversation - onReadRequest: value = " + str(record)
-            )
+            logger.info("ChrAilyConversation - onReadRequest: value = " + str(record))
             self._value = bytes(json.dumps(record), "utf-8")
             callback(Characteristic.RESULT_SUCCESS, self._value)
         except Exception as e:
@@ -73,7 +71,7 @@ class ChrAilyConversation(Characteristic):
     def get_logs(self):
         aily = AilyCtl()
         return aily.get_logs(self._page, self._perPage)
-    
+
     def start_sending(self, interval=0.1):
         if self._timer is not None:
             self._timer.cancel()
@@ -85,26 +83,32 @@ class ChrAilyConversation(Characteristic):
         if self._timer is not None:
             self._timer.cancel()
         self._timer = None
-    
+
     def loop_get(self):
         if self._updateValueCallback is None:
             return
-        
+
         record = self.get_logs()
-        logger.info("ChrAilyConversation - loop_get: value = " + str(record))
         if record:
+            logger.info("ChrAilyConversation - loop_get: value = " + str(record))
             result = {
-                "id": record[0][0],
-                "created_at": record[0][1],
-                "role": record[0][2],
-                "msg": record[0][3],
+                "role": record[0][0],
+                "msg": record[0][1],
             }
-            self._value = bytes(json.dumps(result), "utf-8")
-            if self._value:
+            string_result = json.dumps(result)
+            self._value = bytes(string_result, "utf-8")
+            # 判断self._value的长度，如果超过120字节，就分段发送
+            if len(string_result) > 120:
+                for index in range(0, len(string_result), 120):
+                    value = string_result[index : index + 120]
+                    self._updateValueCallback(bytes(value, "utf-8"))
+            else:
                 self._updateValueCallback(self._value)
-            
+
+            self._updateValueCallback(bytes("\n", "utf-8"))
+
             self._page += 1
         else:
             time.sleep(10)
-        
+
         self.start_sending()
