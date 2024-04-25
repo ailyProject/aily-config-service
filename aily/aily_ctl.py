@@ -144,7 +144,7 @@ class AilyCtl:
             return []
 
         cursor.execute(
-            "SELECT * FROM conversations ORDER BY created_at DESC LIMIT ? OFFSET ?",
+            "SELECT * FROM conversations ORDER BY created_at ASC LIMIT ? OFFSET ?",
             (page_size, (page - 1) * page_size),
         )
         return cursor.fetchall()
