@@ -121,7 +121,6 @@ class AilyCtl:
         os.system(f"sudo supervisorctl start {self.aily_supervisor_name}")
 
     def get_logs(self, page=1, page_size=1):
-        logger.info("dbName: {0}".format(os.environ.get("DB_NAME")))
         if not os.environ.get("DB_NAME"):
             return []
 
@@ -132,8 +131,6 @@ class AilyCtl:
             )
         else:
             db_path = os.environ.get("DB_NAME")
-        
-        logger.info("dbPath: {0}".format(db_path))
 
         conn = sqlite3.connect(db_path)
         cursor = conn.cursor()
