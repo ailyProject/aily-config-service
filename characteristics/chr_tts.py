@@ -33,11 +33,11 @@ class ChrTTSModel(Characteristic):
     def onWriteRequest(self, data, offset, withoutResponse, callback):
         try:
             self._value = data
-            data = json.loads(data.decode("utf-8"))
+            data = data.decode("utf-8")
             logger.info("ChrTTSModel - onWriteRequest: value = " + str(data))
 
             aily = AilyCtl()
-            aily.set_stt_model(data)
+            aily.set_tts_model(data)
 
             callback(Characteristic.RESULT_SUCCESS)
         except Exception as e:
@@ -72,7 +72,7 @@ class ChrTTSRole(Characteristic):
     def onWriteRequest(self, data, offset, withoutResponse, callback):
         try:
             self._value = data
-            data = json.loads(data.decode("utf-8"))
+            data = data.decode("utf-8")
             logger.info("ChrTTSRole - onWriteRequest: value = " + str(data))
 
             aily = AilyCtl()
@@ -111,7 +111,7 @@ class ChrTTSKey(Characteristic):
     def onWriteRequest(self, data, offset, withoutResponse, callback):
         try:
             self._value = data
-            data = json.loads(data.decode("utf-8"))
+            data = data.decode("utf-8")
             logger.info("ChrTTSKey - onWriteRequest: value = " + str(data))
 
             aily = AilyCtl()

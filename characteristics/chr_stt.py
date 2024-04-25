@@ -33,7 +33,7 @@ class ChrSTTModel(Characteristic):
     def onWriteRequest(self, data, offset, withoutResponse, callback):
         try:
             self._value = data
-            data = json.loads(data.decode("utf-8"))
+            data = data.decode("utf-8")
             logger.info("ChrSttModel - onWriteRequest: value = " + str(data))
 
             aily = AilyCtl()
@@ -72,7 +72,7 @@ class ChrSTTKey(Characteristic):
     def onWriteRequest(self, data, offset, withoutResponse, callback):
         try:
             self._value = data
-            data = json.loads(data.decode("utf-8"))
+            data = data.decode("utf-8")
             logger.info("ChrSttKey - onWriteRequest: value = " + str(data))
 
             aily = AilyCtl()

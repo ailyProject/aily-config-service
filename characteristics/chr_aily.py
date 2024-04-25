@@ -98,9 +98,9 @@ class ChrAilyConversation(Characteristic):
             string_result = json.dumps(result)
             self._value = bytes(string_result, "utf-8")
             # 判断self._value的长度，如果超过120字节，就分段发送
-            if len(string_result) > 120:
-                for index in range(0, len(string_result), 120):
-                    value = string_result[index : index + 120]
+            if len(string_result) > 60:
+                for index in range(0, len(string_result), 60):
+                    value = string_result[index : index + 60]
                     self._updateValueCallback(bytes(value, "utf-8"))
             else:
                 self._updateValueCallback(self._value)

@@ -12,7 +12,7 @@ class ChrLLMModel(Characteristic):
             self,
             {
                 "uuid": uuid,
-                "properties": ["read", "notify"],
+                "properties": ["read", "write", "notify"],
                 "value": None,
             },
         )
@@ -30,8 +30,8 @@ class ChrLLMModel(Characteristic):
 
     def onWriteRequest(self, data, offset, withoutResponse, callback):
         try:
-            data = json.loads(data.decode("utf-8"))
             logger.info("ChrLLMModel - onWriteRequest: value = " + str(data))
+            data = data.decode("utf-8")
 
             if data:
                 aily = AilyCtl()
@@ -74,7 +74,7 @@ class ChrLLMKey(Characteristic):
             self,
             {
                 "uuid": uuid,
-                "properties": ["read", "notify"],
+                "properties": ["read", "write", "notify"],
                 "value": None,
             },
         )
@@ -93,8 +93,8 @@ class ChrLLMKey(Characteristic):
 
     def onWriteRequest(self, data, offset, withoutResponse, callback):
         try:
-            data = json.loads(data.decode("utf-8"))
             logger.info("ChrLLMKey - onWriteRequest: value = " + str(data))
+            data = data.decode("utf-8")
 
             if data:
                 aily = AilyCtl()
@@ -120,7 +120,7 @@ class ChrLLMPrePrompt(Characteristic):
             self,
             {
                 "uuid": uuid,
-                "properties": ["read", "notify"],
+                "properties": ["read", "write", "notify"],
                 "value": None,
             },
         )
@@ -139,8 +139,8 @@ class ChrLLMPrePrompt(Characteristic):
 
     def onWriteRequest(self, data, offset, withoutResponse, callback):
         try:
-            data = json.loads(data.decode("utf-8"))
             logger.info("ChrLLMPrePrompt - onWriteRequest: value = " + str(data))
+            data = data.decode("utf-8")
 
             if data:
                 aily = AilyCtl()
@@ -166,7 +166,7 @@ class ChrLLMTemp(Characteristic):
             self,
             {
                 "uuid": uuid,
-                "properties": ["read", "notify"],
+                "properties": ["read", "write", "notify"],
                 "value": None,
             },
         )
@@ -185,8 +185,8 @@ class ChrLLMTemp(Characteristic):
 
     def onWriteRequest(self, data, offset, withoutResponse, callback):
         try:
-            data = json.loads(data.decode("utf-8"))
             logger.info("ChrLLMTemp - onWriteRequest: value = " + str(data))
+            data = data.decode("utf-8")
 
             if data:
                 aily = AilyCtl()
