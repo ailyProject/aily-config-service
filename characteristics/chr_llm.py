@@ -139,8 +139,8 @@ class ChrLLMPrePrompt(Characteristic):
 
     def onWriteRequest(self, data, offset, withoutResponse, callback):
         try:
-            logger.info("ChrLLMPrePrompt - onWriteRequest: value = " + str(data))
             data = data.decode("utf-8")
+            logger.info("ChrLLMPrePrompt - onWriteRequest: value = " + str(data))
 
             if data:
                 aily = AilyCtl()
@@ -190,7 +190,7 @@ class ChrLLMTemp(Characteristic):
 
             if data:
                 aily = AilyCtl()
-                aily.set_llm_preprompt(data)
+                aily.set_llm_temp(data)
 
             callback(Characteristic.RESULT_SUCCESS)
         except Exception as e:

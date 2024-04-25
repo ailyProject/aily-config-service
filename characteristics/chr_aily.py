@@ -91,20 +91,24 @@ class ChrAilyConversation(Characteristic):
         record = self.get_logs()
         if record:
             logger.info("ChrAilyConversation - loop_get: value = " + str(record))
-            result = {
-                "role": record[0][0],
-                "msg": record[0][1],
-            }
-            string_result = json.dumps(result)
+            string_result = record[0][0] + ":" + record[0][1]
+            # result = {
+            #     "role": record[0][0],
+            #     "msg": record[0][1],
+            # }
+            # string_result = json.dumps(result)
             self._value = bytes(string_result, "utf-8")
             # 判断self._value的长度，如果超过120字节，就分段发送
-            if len(string_result) > 60:
-                for index in range(0, len(string_result), 60):
-                    value = string_result[index : index + 60]
+            if len(string_result) > 120:
+                for index in range(0, len(string_result), 120):
+                    value = string_result[index : index + 120]
+                    logger.info("Sending: {0}".format(value))
                     self._updateValueCallback(bytes(value, "utf-8"))
+                    time.sleep(0.01)
             else:
                 self._updateValueCallback(self._value)
 
+            # self._updateValueCallback(self._value)
             self._updateValueCallback(bytes("\n", "utf-8"))
 
             self._page += 1

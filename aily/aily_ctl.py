@@ -48,72 +48,72 @@ class AilyCtl:
 
     def set_llm_model(self, value):
         os.environ["LLM_MODEL"] = value
-        set_key(self.aily_env_path, "LLM_MODEL", value)
-        return True
+        res, k, v = set_key(self.aily_env_path, "LLM_MODEL", value)
+        return res
 
     def get_llm_key(self):
         return os.getenv("LLM_KEY", "")
 
     def set_llm_key(self, value):
         os.environ["LLM_KEY"] = value
-        set_key(self.aily_env_path, "LLM_KEY", value)
-        return True
+        res, k, v = set_key(self.aily_env_path, "LLM_KEY", value)
+        return res
 
     def get_llm_preprompt(self):
         return os.getenv("LLM_PRE_PROMPT", "")
 
     def set_llm_preprompt(self, value):
         os.environ["LLM_PRE_PROMPT"] = value
-        set_key(self.aily_env_path, "LLM_PRE_PROMPT", value)
-        return True
+        res, k, v = set_key(self.aily_env_path, "LLM_PRE_PROMPT", value)
+        return res
 
     def get_llm_temp(self):
         return os.getenv("LLM_TEMPERATURE", "")
 
     def set_llm_temp(self, value):
         os.environ["LLM_TEMPERATURE"] = value
-        set_key(self.aily_env_path, "LLM_TEMPERATURE", value)
-        return True
+        res, k, v = set_key(self.aily_env_path, "LLM_TEMPERATURE", value)
+        return res
 
     def get_stt_model(self):
         return os.getenv("STT_MODEL", "")
 
     def set_stt_model(self, value):
         os.environ["STT_MODEL"] = value
-        set_key(self.aily_env_path, "STT_MODEL", value)
-        return True
+        res, k, v = set_key(self.aily_env_path, "STT_MODEL", value)
+        return res
 
     def get_stt_key(self):
         return os.getenv("STT_KEY", "")
 
     def set_stt_key(self, value):
         os.environ["STT_KEY"] = value
-        set_key(self.aily_env_path, "STT_KEY", value)
-        return True
+        res, k, v = set_key(self.aily_env_path, "STT_KEY", value)
+        return res
 
     def get_tts_model(self):
         return os.getenv("TTS_MODEL", "")
 
     def set_tts_model(self, value):
         os.environ["TTS_MODEL"] = value
-        set_key(self.aily_env_path, "TTS_MODEL", value)
-        return True
+        res, k, v = set_key(self.aily_env_path, "TTS_MODEL", value)
+        return res
 
     def get_tts_key(self):
         return os.getenv("TTS_KEY", "")
 
     def set_tts_key(self, value):
         os.environ["TTS_KEY"] = value
-        set_key(self.aily_env_path, "TTS_KEY", value)
-        return True
+        res, k, v = set_key(self.aily_env_path, "TTS_KEY", value)
+        return res
 
     def get_tts_role(self):
         return os.getenv("TTS_ROLE", "")
 
     def set_tts_role(self, value):
         os.environ["TTS_ROLE"] = value
-        set_key(self.aily_env_path, "TTS_ROLE", value)
-        return True
+        res, k, v = set_key(self.aily_env_path, "TTS_ROLE", value)
+        return res
 
     def save(self):
         # 重启aily服务
