@@ -93,7 +93,13 @@ class ChrAilyConversation(Characteristic):
         record = self.get_logs()
         logger.info("ChrAilyConversation - loop_get: value = " + str(record))
         if record:
-            self._value = bytes(json.dumps(record), "utf-8")
+            result = {
+                "id": record[0][0],
+                "created_at": record[0][1],
+                "role": record[0][2],
+                "msg": record[0][3],
+            }
+            self._value = bytes(json.dumps(result), "utf-8")
             if self._value:
                 self._updateValueCallback(self._value)
             
