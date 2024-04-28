@@ -1,6 +1,8 @@
 import json
 import os
 import yaml
+import time
+import threading
 from pybleno import Characteristic
 from loguru import logger
 from aily import AilyCtl
@@ -95,10 +97,11 @@ class ChrSTTModelOptions(Characteristic):
             },
         )
         self._value = None
+        self._timer = None
 
     def onReadRequest(self, offset, callback):
         try:
-            data = self.get_conf()
+            data = json.dumps(self.get_conf())
             logger.info("ChrSTTModelOptions - onReadRequest: value = " + str(data))
             self._value = bytes(data, "utf8")
             callback(Characteristic.RESULT_SUCCESS, self._value)
@@ -112,7 +115,48 @@ class ChrSTTModelOptions(Characteristic):
             conf_file = os.getenv("AILY_CONFIG_PATH")
             with open(conf_file, "r") as f:
                 conf = yaml.safe_load(f)
-            return json.dumps(conf["stt"]["models"])
+            return conf["stt"]["models"]
         except Exception as e:
             logger.error(f"ChrSTTModelOptions - get_conf: {e}")
             return "N/A"
+    
+    def onSubscribe(self, maxValueSize, updateValueCallback):
+        logger.info("ChrSTTModelOptions - onSubscribe")
+        self._updateValueCallback = updateValueCallback
+        self.start_sending()
+
+    def onUnsubscribe(self):
+        logger.info("ChrSTTModelOptions - onUnsubscribe")
+        self._updateValueCallback = None
+        self.stop_sending()
+    
+    def start_sending(self, interval=0.1):
+        if self._timer is not None:
+            self._timer.cancel()
+
+        self._timer = threading.Timer(interval, self.loop_get)
+        self._timer.start()
+
+    def stop_sending(self):
+        if self._timer is not None:
+            self._timer.cancel()
+        self._timer = None
+
+    def loop_get(self):
+        if self._updateValueCallback is None:
+            return
+
+        records = self.get_conf()
+        if records and records != "N/A":
+            logger.info("ChrSTTModelOptions - loop_get: value = " + str(records))
+            self._value = bytes(json.dumps(records), "utf-8")
+            # 判断self._value的长度，如果超过120字节，就分段发送
+            for model in records:
+                send_data = model["name"] + ":" + model["value"]
+                self._updateValueCallback(bytes(send_data, "utf-8"))
+                time.sleep(0.01)
+        else:
+            self._updateValueCallback(bytes("[]", "utf-8"))
+        
+        self._updateValueCallback(bytes("\n", "utf-8"))
+        self.stop_sending()

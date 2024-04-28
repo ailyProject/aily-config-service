@@ -1,6 +1,8 @@
 import json
 import os
 import yaml
+import time
+import threading
 from pybleno import Characteristic
 from loguru import logger
 from aily import AilyCtl
@@ -134,10 +136,11 @@ class ChrTTSModelOptions(Characteristic):
             },
         )
         self._value = None
+        self._timer = None
 
     def onReadRequest(self, offset, callback):
         try:
-            data = self.get_conf()
+            data = json.dumps(self.get_conf())
             logger.info("ChrTTSModelOptions - onReadRequest: value = " + str(data))
             self._value = bytes(data, "utf8")
             callback(Characteristic.RESULT_SUCCESS, self._value)
@@ -151,9 +154,50 @@ class ChrTTSModelOptions(Characteristic):
             conf_file = os.getenv("AILY_CONFIG_PATH")
             with open(conf_file, "r") as f:
                 conf = yaml.safe_load(f)
-            return json.dumps(conf["tts"]["models"])
+            return conf["tts"]["models"]
         except Exception as e:
             return "N/A"
+    
+    def onSubscribe(self, maxValueSize, updateValueCallback):
+        logger.info("ChrTTSModelOptions - onSubscribe")
+        self._updateValueCallback = updateValueCallback
+        self.start_sending()
+
+    def onUnsubscribe(self):
+        logger.info("ChrTTSModelOptions - onUnsubscribe")
+        self._updateValueCallback = None
+        self.stop_sending()
+    
+    def start_sending(self, interval=0.1):
+        if self._timer is not None:
+            self._timer.cancel()
+
+        self._timer = threading.Timer(interval, self.loop_get)
+        self._timer.start()
+
+    def stop_sending(self):
+        if self._timer is not None:
+            self._timer.cancel()
+        self._timer = None
+
+    def loop_get(self):
+        if self._updateValueCallback is None:
+            return
+
+        records = self.get_conf()
+        if records:
+            logger.info("ChrTTSModelOptions - loop_get: value = " + str(records))
+            self._value = bytes(json.dumps(records), "utf-8")
+            # 判断self._value的长度，如果超过120字节，就分段发送
+            for model in records:
+                send_data = model["name"] + ":" + model["value"]
+                self._updateValueCallback(bytes(send_data, "utf-8"))
+                time.sleep(0.01)
+
+            # self._updateValueCallback(self._value)
+            self._updateValueCallback(bytes("\n", "utf-8"))
+
+        self.stop_sending()
 
 
 class ChrTTSRoleOptions(Characteristic):
@@ -167,10 +211,11 @@ class ChrTTSRoleOptions(Characteristic):
             },
         )
         self._value = None
+        self._timer = None
 
     def onReadRequest(self, offset, callback):
         try:
-            data = self.get_conf()
+            data = json.dumps(self.get_conf())
             logger.info("ChrTTSRoleOptions - onReadRequest: value = " + str(data))
             self._value = bytes(data, "utf8")
             callback(Characteristic.RESULT_SUCCESS, self._value)
@@ -184,7 +229,51 @@ class ChrTTSRoleOptions(Characteristic):
             conf_file = os.getenv("AILY_CONFIG_PATH")
             with open(conf_file, "r") as f:
                 conf = yaml.safe_load(f)
-            return json.dumps([])
+            return conf["tts"]["roles"]
             # return json.dumps(conf["tts"]["roles"])
         except Exception as e:
             return "N/A"
+    
+    def onSubscribe(self, maxValueSize, updateValueCallback):
+        logger.info("ChrTTSRoleOptions - onSubscribe")
+        self._updateValueCallback = updateValueCallback
+        self.start_sending()
+
+    def onUnsubscribe(self):
+        logger.info("ChrTTSRoleOptions - onUnsubscribe")
+        self._updateValueCallback = None
+        self.stop_sending()
+    
+    def start_sending(self, interval=0.1):
+        if self._timer is not None:
+            self._timer.cancel()
+
+        self._timer = threading.Timer(interval, self.loop_get)
+        self._timer.start()
+
+    def stop_sending(self):
+        if self._timer is not None:
+            self._timer.cancel()
+        self._timer = None
+
+    def loop_get(self):
+        if self._updateValueCallback is None:
+            return
+
+        records = self.get_conf()
+        if records and records != "N/A":
+            logger.info("ChrTTSRoleOptions - loop_get: value = " + str(records))
+            self._value = bytes(json.dumps(records), "utf-8")
+            # 判断self._value的长度，如果超过120字节，就分段发送
+            for model in records:
+                logger.info("model: {0}".format(model))
+                send_data = model["name"] + ":" + model["value"]
+                self._updateValueCallback(bytes(send_data, "utf-8"))
+                time.sleep(0.01)
+
+            # self._updateValueCallback(self._value)
+        else:
+            self._updateValueCallback(bytes("[]", "utf-8"))
+        
+        self._updateValueCallback(bytes("\n", "utf-8"))
+        self.stop_sending()
