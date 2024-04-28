@@ -1,5 +1,6 @@
 import os
 import sqlite3
+import re
 
 from dotenv import set_key, load_dotenv
 from loguru import logger
@@ -145,3 +146,17 @@ class AilyCtl:
             (page_size, (page - 1) * page_size),
         )
         return cursor.fetchall()
+    
+    def get_status(self):
+        # 获取superivsor中aily服务的状态
+        try:
+            output = os.popen(f"sudo supervisorctl status {self.aily_supervisor_name}").read()
+            match = re.search(r'\b(RUNNING|STOPPED|STARTING|EXITED)\b', output)
+            if match:
+                status = match.group(0)
+            else:
+                status = "N/A"
+            return status
+        except Exception as e:
+            logger.error(f"get_status: {e}")
+            return "N/A"

@@ -7,7 +7,7 @@ from aily import AilyCtl
 
 
 class ChrAilyReload(Characteristic):
-    def __init__(self, uuid):
+    def __init__(self, uuid, aily_status=None):
         Characteristic.__init__(
             self,
             {
@@ -17,6 +17,7 @@ class ChrAilyReload(Characteristic):
             },
         )
         self._value = None
+        self._aily_status = aily_status
 
     def onWriteRequest(self, data, offset, withoutResponse, callback):
         try:
@@ -24,11 +25,19 @@ class ChrAilyReload(Characteristic):
 
             aily = AilyCtl()
             aily.save()
-
+            
+            t = threading.Thread(target=self.emit_update)
+            t.start()
+            
             callback(Characteristic.RESULT_SUCCESS)
         except Exception as e:
             logger.error(f"ChrSttModel - onWriteRequest: {e}")
             callback(Characteristic.RESULT_UNLIKELY_ERROR)
+    
+    
+    def emit_update(self):
+        time.sleep(2)
+        self._aily_status.send_status()
 
 
 class ChrAilyConversation(Characteristic):
@@ -114,5 +123,63 @@ class ChrAilyConversation(Characteristic):
             self._page += 1
         else:
             time.sleep(10)
+
+        self.start_sending()
+
+
+class ChrAilyStatus(Characteristic):
+    def __init__(self, uuid):
+        Characteristic.__init__(
+            self,
+            {
+                "uuid": uuid,
+                "properties": ["notify"],
+                "value": None,
+            },
+        )
+        self._value = None
+        self._timer = None
+
+    def onSubscribe(self, maxValueSize, updateValueCallback):
+        logger.info("ChrLLMModelOptions - onSubscribe")
+        self._updateValueCallback = updateValueCallback
+        self.start_sending()
+
+    def onUnsubscribe(self):
+        logger.info("ChrLLMModelOptions - onUnsubscribe")
+        self._updateValueCallback = None
+        self.stop_sending()
+    
+    def send_status(self):
+        status = self.get_status()
+        self._value = status.encode("utf-8")
+        if self._updateValueCallback:
+            self._updateValueCallback(self._value)
+
+    def get_status(self):
+        aily = AilyCtl()
+        return aily.get_status()
+
+    def start_sending(self, interval=600):
+        if self._timer is not None:
+            self._timer.cancel()
+
+        self._timer = threading.Timer(interval, self.loop_get)
+        self._timer.start()
+
+    def stop_sending(self):
+        if self._timer is not None:
+            self._timer.cancel()
+        self._timer = None
+
+    def loop_get(self):
+        if self._updateValueCallback is None:
+            return
+
+        status = self.get_status()
+        self._value = status.encode("utf-8")
+
+        if self._updateValueCallback:
+            self._updateValueCallback(self._value)
 
         self.start_sending()

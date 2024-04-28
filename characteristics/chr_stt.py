@@ -153,8 +153,8 @@ class ChrSTTModelOptions(Characteristic):
             # 判断self._value的长度，如果超过120字节，就分段发送
             for model in records:
                 send_data = model["name"] + ":" + model["value"]
-                self._updateValueCallback(bytes(send_data, "utf-8"))
-                time.sleep(0.01)
+                logger.info("model: {0}".format(send_data))
+                self._updateValueCallback(send_data.encode("utf-8"))
         else:
             self._updateValueCallback(bytes("[]", "utf-8"))
         

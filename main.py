@@ -64,7 +64,8 @@ chr_tts_key = ChrTTSKey("123e4567-e89b-12d3-a456-00805f9b3505")
 chr_tts_role = ChrTTSRole("123e4567-e89b-12d3-a456-00805f9b3506")
 chr_tts_model_options = ChrTTSModelOptions("123e4567-e89b-12d3-a456-00805f9b3507")
 chr_tts_role_options = ChrTTSRoleOptions("123e4567-e89b-12d3-a456-00805f9b3508")
-chr_aily_reload = ChrAilyReload("123e4567-e89b-12d3-a456-00805f9b3509")
+chr_aily_status = ChrAilyStatus("123e4567-e89b-12d3-a456-00805f9b350b")
+chr_aily_reload = ChrAilyReload("123e4567-e89b-12d3-a456-00805f9b3509", aily_status=chr_aily_status)
 chr_aily_convesation = ChrAilyConversation("123e4567-e89b-12d3-a456-00805f9b350a")
 
 
@@ -102,7 +103,8 @@ def onAdvertisingStart(error):
                             chr_tts_model_options,
                             chr_tts_role_options,
                             chr_aily_reload,
-                            chr_aily_convesation
+                            chr_aily_convesation,
+                            chr_aily_status,
                         ],
                     }
                 )

@@ -276,10 +276,9 @@ class ChrLLMModelOptions(Characteristic):
             for model in records:
                 send_data = model["name"] + ":" + model["value"]
                 logger.info("model: {0}".format(send_data))
-                self._updateValueCallback(bytes(str(send_data), "utf-8"))
-                time.sleep(0.01)
+                self._updateValueCallback(send_data.encode("utf-8"))
         else:
-            self._updateValueCallback(bytes("[]", "utf-8"))
+            self._updateValueCallback(bytes(str([]), "utf-8"))
         
         self._updateValueCallback(bytes("\n", "utf-8"))
         self.stop_sending()

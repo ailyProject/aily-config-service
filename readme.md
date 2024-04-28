@@ -15,6 +15,7 @@ cp .env.sample .env
 
 ## 部署
 ### 自动部署
+
 ```
 chmod +x deploy.sh
 deploy.sh
@@ -59,3 +60,15 @@ sudo systemctl enable ailyconf.service
 sudo systemctl start ailyconf.service
 ...
 ```
+
+## 树莓派可能的问题
+
+### 蓝牙总是自动断开
+> 客户端连接后总是无缘无故的断开连接，且只能手动重启树莓派才行
+
+1. 检查树莓派cpu是否占用过高，是否是packagekitd服务导致的
+2. 如果是packagekitd服务可尝试关闭开机自动启动（或者等待该服务运行完成后再进行蓝牙连接等操作）
+    ```
+    sudo systemctl stop packagekitd
+    sudo systemctl disable packagekit
+    ```

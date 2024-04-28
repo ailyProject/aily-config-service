@@ -23,7 +23,7 @@ from .chr_tts import (
     ChrTTSModelOptions,
     ChrTTSRoleOptions,
 )
-from .chr_aily import ChrAilyReload, ChrAilyConversation
+from .chr_aily import ChrAilyReload, ChrAilyConversation, ChrAilyStatus
 
 
 __all__ = [
@@ -51,5 +51,6 @@ __all__ = [
     "ChrTTSModelOptions",
     "ChrTTSRoleOptions",
     "ChrAilyReload",
-    "ChrAilyConversation"
+    "ChrAilyConversation",
+    "ChrAilyStatus"
 ]

@@ -191,8 +191,9 @@ class ChrTTSModelOptions(Characteristic):
             # 判断self._value的长度，如果超过120字节，就分段发送
             for model in records:
                 send_data = model["name"] + ":" + model["value"]
-                self._updateValueCallback(bytes(send_data, "utf-8"))
-                time.sleep(0.01)
+                logger.info("model: {0}".format(send_data))
+                self._updateValueCallback(send_data.encode("utf-8"))
+                time.sleep(0.1)
 
             # self._updateValueCallback(self._value)
             self._updateValueCallback(bytes("\n", "utf-8"))
@@ -268,12 +269,12 @@ class ChrTTSRoleOptions(Characteristic):
             for model in records:
                 logger.info("model: {0}".format(model))
                 send_data = model["name"] + ":" + model["value"]
-                self._updateValueCallback(bytes(send_data, "utf-8"))
-                time.sleep(0.01)
+                logger.info("model: {0}".format(send_data))
+                self._updateValueCallback(send_data.encode("utf-8"))
 
             # self._updateValueCallback(self._value)
         else:
-            self._updateValueCallback(bytes("[]", "utf-8"))
+            self._updateValueCallback("[]".encode("utf-8"))
         
         self._updateValueCallback(bytes("\n", "utf-8"))
         self.stop_sending()
