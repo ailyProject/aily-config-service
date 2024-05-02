@@ -17,8 +17,10 @@ cp .env.sample .env
 ### 自动部署
 
 ```
+git clone https://github.com/ailyProject/aily-config-service-deploy.git
+cd aily-config-service-deploy
 chmod +x deploy.sh
-deploy.sh
+./deploy.sh
 ```
 
 ### 手动部署
@@ -30,7 +32,7 @@ git clone -b py https://github.com/ailyProject/aily-config-service.git
 
 - 安装环境
 ```shell
-python3 -m venv venv
+python3 -m venv .venv
 venv/bin/pip install -r requirements.pip
 ```
 
@@ -46,18 +48,6 @@ sudo apt-get install supervisor
 sudo cp ailyconf.conf /etc/supervisor/conf.d/
 
 sudo supervisorctl reload
-...
-```
-
-#### systemd方式
-- 配置`systemd/ailyconf.service`中的`ExecStart`字段为自己的程序启动路径
-- 执行以下操作:
-```shell
-sudo cp ailyconf.service /etc/systemd/system/
-
-sudo systemctl daemon-reload
-sudo systemctl enable ailyconf.service
-sudo systemctl start ailyconf.service
 ...
 ```
 
