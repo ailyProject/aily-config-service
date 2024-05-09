@@ -156,7 +156,7 @@ class ChrTTSModelOptions(Characteristic):
                 conf = yaml.safe_load(f)
             return conf["tts"]["models"]
         except Exception as e:
-            return "N/A"
+            return []
     
     def onSubscribe(self, maxValueSize, updateValueCallback):
         logger.info("ChrTTSModelOptions - onSubscribe")
@@ -274,7 +274,7 @@ class ChrTTSRoleOptions(Characteristic):
 
             # self._updateValueCallback(self._value)
         else:
-            self._updateValueCallback("[]".encode("utf-8"))
+            pass
         
-        self._updateValueCallback(bytes("\n", "utf-8"))
+        self._updateValueCallback(bytes("EOF", "utf-8"))
         self.stop_sending()

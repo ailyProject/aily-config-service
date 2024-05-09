@@ -118,7 +118,7 @@ class ChrSTTModelOptions(Characteristic):
             return conf["stt"]["models"]
         except Exception as e:
             logger.error(f"ChrSTTModelOptions - get_conf: {e}")
-            return "N/A"
+            return []
     
     def onSubscribe(self, maxValueSize, updateValueCallback):
         logger.info("ChrSTTModelOptions - onSubscribe")
@@ -156,7 +156,7 @@ class ChrSTTModelOptions(Characteristic):
                 logger.info("model: {0}".format(send_data))
                 self._updateValueCallback(send_data.encode("utf-8"))
         else:
-            self._updateValueCallback(bytes("[]", "utf-8"))
+            pass
         
-        self._updateValueCallback(bytes("\n", "utf-8"))
+        self._updateValueCallback(bytes("EOF", "utf-8"))
         self.stop_sending()

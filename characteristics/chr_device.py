@@ -364,7 +364,7 @@ class ChrRamUsage(Characteristic):
         self._updateValueCallback = None
         self.stop_sending()
     
-    def start_sending(self, interval=30):
+    def start_sending(self, interval=10):
         if self._timer is not None:
             self._timer.cancel()
 
@@ -447,7 +447,7 @@ class ChrCpuTemperature(Characteristic):
         self._updateValueCallback = None
         self.stop_sending()
     
-    def start_sending(self, interval=60):
+    def start_sending(self, interval=30):
         if self._timer is not None:
             self._timer.cancel()
 
@@ -536,7 +536,7 @@ class ChrCpuUsage(Characteristic):
         except Exception as e:
             return "N/A"
 
-    def start_sending(self, interval=20):
+    def start_sending(self, interval=15):
         if self._timer is not None:
             self._timer.cancel()
 

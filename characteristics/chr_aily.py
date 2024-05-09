@@ -118,7 +118,7 @@ class ChrAilyConversation(Characteristic):
                 self._updateValueCallback(self._value)
 
             # self._updateValueCallback(self._value)
-            self._updateValueCallback(bytes("\n", "utf-8"))
+            self._updateValueCallback(bytes("EOF", "utf-8"))
 
             self._page += 1
         else:
