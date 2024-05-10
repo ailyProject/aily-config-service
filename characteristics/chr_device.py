@@ -556,6 +556,6 @@ class ChrCpuUsage(Characteristic):
         if self._value:
             self._updateValueCallback(self._value)
         
-        logger.info("Cpu Usage Sent: {0}".formst(str(self._value)))
+        logger.info("Cpu Usage Sent: {0}".format(str(self._value)))
 
         self.start_sending()
