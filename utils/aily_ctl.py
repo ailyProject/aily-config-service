@@ -5,6 +5,7 @@ import re
 from dotenv import set_key, load_dotenv
 from loguru import logger
 from pathlib import Path
+from loguru import logger
 
 
 def singleton(cls):
@@ -12,6 +13,7 @@ def singleton(cls):
 
     def get_instance(*args, **kwargs):
         if cls not in instances:
+            logger.info("Creating new instance")
             instances[cls] = cls(*args, **kwargs)
         return instances[cls]
 
