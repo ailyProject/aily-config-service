@@ -7,10 +7,29 @@ from loguru import logger
 from pathlib import Path
 
 
+def singleton(cls):
+    instances = {}
+
+    def get_instance(*args, **kwargs):
+        if cls not in instances:
+            instances[cls] = cls(*args, **kwargs)
+        return instances[cls]
+
+    return get_instance
+
+
+@singleton
 class AilyCtl:
+    _instance = None
     aily_path = None
     aily_env_path = None
     aily_supervisor_name = None
+
+    # @staticmethod
+    # def get_instance():
+    #     if AilyCtl._instance is None:
+    #         AilyCtl._instance = AilyCtl()
+    #     return AilyCtl._instance
 
     def load_aily_conf(self):
         aily_path = os.environ.get("AILY_PATH")
@@ -42,7 +61,16 @@ class AilyCtl:
     def __init__(self) -> None:
         load_res = self.load_aily_conf()
         if not load_res:
-            raise RuntimeError("Failed to load AILY_CONF_PATH")
+            pass
+            # raise RuntimeError("Failed to load AILY_CONF_PATH")
+        # if AilyCtl._instance is not None:
+        #     pass
+        # else:
+        #     load_res = self.load_aily_conf()
+        #     if not load_res:
+        #         pass
+        #         # raise RuntimeError("Failed to load AILY_CONF_PATH")
+        #     AilyCtl._instance = self
 
     def get_llm_model(self):
         return os.getenv("LLM_MODEL", "")
@@ -146,12 +174,14 @@ class AilyCtl:
             (page_size, (page - 1) * page_size),
         )
         return cursor.fetchall()
-    
+
     def get_status(self):
         # 获取superivsor中aily服务的状态
         try:
-            output = os.popen(f"sudo supervisorctl status {self.aily_supervisor_name}").read()
-            match = re.search(r'\b(RUNNING|STOPPED|STARTING|EXITED)\b', output)
+            output = os.popen(
+                f"sudo supervisorctl status {self.aily_supervisor_name}"
+            ).read()
+            match = re.search(r"\b(RUNNING|STOPPED|STARTING|EXITED)\b", output)
             if match:
                 status = match.group(0)
             else:

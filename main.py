@@ -112,10 +112,15 @@ def onAdvertisingStart(error):
         )
 
 
-bleno.on("advertisingStart", onAdvertisingStart)
+def onDisconnect(clientAddress):
+    logger.info("on -> disconnect")
+    bleno.disconnect()
 
+bleno.on("advertisingStart", onAdvertisingStart)
+bleno.on("disconnect", onDisconnect)
 
 try:
+    logger.info("Starting....")
     bleno.start()
     input("Press <Enter> to stop the program\n")
 except KeyboardInterrupt:
