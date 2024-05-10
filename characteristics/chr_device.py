@@ -555,5 +555,7 @@ class ChrCpuUsage(Characteristic):
         self._value = bytes(str(self.get_cpu_usage()), "utf8")
         if self._value:
             self._updateValueCallback(self._value)
+        
+        logger.info("Cpu Usage Sent: {0}".formst(str(self._value)))
 
         self.start_sending()

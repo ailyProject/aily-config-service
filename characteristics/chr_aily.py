@@ -3,7 +3,7 @@ import threading
 import time
 from pybleno import Characteristic
 from loguru import logger
-from aily import AilyCtl
+from utils import AilyCtl
 
 
 class ChrAilyReload(Characteristic):

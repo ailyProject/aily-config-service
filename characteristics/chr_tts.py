@@ -5,7 +5,7 @@ import time
 import threading
 from pybleno import Characteristic
 from loguru import logger
-from aily import AilyCtl
+from utils import AilyCtl, ConfigLoad
 
 
 class ChrTTSModel(Characteristic):
@@ -151,10 +151,12 @@ class ChrTTSModelOptions(Characteristic):
     @staticmethod
     def get_conf():
         try:
-            conf_file = os.getenv("AILY_CONFIG_PATH")
-            with open(conf_file, "r") as f:
-                conf = yaml.safe_load(f)
-            return conf["tts"]["models"]
+            # conf_file = os.getenv("AILY_CONFIG_PATH")
+            # with open(conf_file, "r") as f:
+            #     conf = yaml.safe_load(f)
+            # return conf["tts"]["models"]
+            config_load = ConfigLoad()
+            return config_load.get_tts_models()
         except Exception as e:
             return []
     
