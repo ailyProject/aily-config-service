@@ -14,14 +14,16 @@ from .chr_llm import (
     ChrLLMPrePrompt,
     ChrLLMTemp,
     ChrLLMModelOptions,
+    ChrLLMUrl
 )
-from .chr_stt import ChrSTTModel, ChrSTTKey, ChrSTTModelOptions
+from .chr_stt import ChrSTTModel, ChrSTTKey, ChrSTTModelOptions, ChrSTTUrl
 from .chr_tts import (
     ChrTTSModel,
     ChrTTSKey,
     ChrTTSRole,
     ChrTTSModelOptions,
     ChrTTSRoleOptions,
+    ChrTTSUrl
 )
 from .chr_aily import ChrAilyReload, ChrAilyConversation, ChrAilyStatus
 
@@ -52,5 +54,8 @@ __all__ = [
     "ChrTTSRoleOptions",
     "ChrAilyReload",
     "ChrAilyConversation",
-    "ChrAilyStatus"
+    "ChrAilyStatus",
+    "ChrLLMUrl",
+    "ChrSTTUrl",
+    "ChrTTSUrl",
 ]

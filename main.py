@@ -52,13 +52,16 @@ chr_power = ChrPower("123e4567-e89b-12d3-a456-426614174010")
 chr_wifi = ChrWifi(
     "123e4567-e89b-12d3-a456-00805f9b34fb", chr_ip=chr_ip, chr_network=chr_network
 )
+chr_llm_url = ChrLLMUrl("123e4567-e89b-12d3-a456-00805f9b34fc")
 chr_llm_key = ChrLLMKey("123e4567-e89b-12d3-a456-00805f9b34fd")
 chr_llm_pre_prompt = ChrLLMPrePrompt("123e4567-e89b-12d3-a456-00805f9b34fe")
 chr_llm_temp = ChrLLMTemp("123e4567-e89b-12d3-a456-00805f9b34ff")
 chr_llm_model_options = ChrLLMModelOptions("123e4567-e89b-12d3-a456-00805f9b3500")
+chr_stt_url = ChrSTTUrl("123e4567-e89b-12d3-a456-00805f9b350c")
 chr_stt_model = ChrSTTModel("123e4567-e89b-12d3-a456-00805f9b3501")
 chr_stt_key = ChrSTTKey("123e4567-e89b-12d3-a456-00805f9b3502")
 chr_stt_model_options = ChrSTTModelOptions("123e4567-e89b-12d3-a456-00805f9b3503")
+chr_tts_url = ChrTTSUrl("123e4567-e89b-12d3-a456-00805f9b350d")
 chr_tts_model = ChrTTSModel("123e4567-e89b-12d3-a456-00805f9b3504")
 chr_tts_key = ChrTTSKey("123e4567-e89b-12d3-a456-00805f9b3505")
 chr_tts_role = ChrTTSRole("123e4567-e89b-12d3-a456-00805f9b3506")
@@ -105,6 +108,9 @@ def onAdvertisingStart(error):
                             chr_aily_reload,
                             chr_aily_convesation,
                             chr_aily_status,
+                            chr_llm_url,
+                            chr_stt_url,
+                            chr_tts_url,
                         ],
                     }
                 )

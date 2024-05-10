@@ -73,6 +73,14 @@ class AilyCtl:
         #         pass
         #         # raise RuntimeError("Failed to load AILY_CONF_PATH")
         #     AilyCtl._instance = self
+        
+    def get_llm_url(self):
+        return os.getenv("LLM_URL", "")
+    
+    def set_llm_url(self, value):
+        os.environ["LLM_URL"] = value
+        res, k, v = set_key(self.aily_env_path, "LLM_URL", value)
+        return res
 
     def get_llm_model(self):
         return os.getenv("LLM_MODEL", "")
@@ -105,6 +113,14 @@ class AilyCtl:
         os.environ["LLM_TEMPERATURE"] = value
         res, k, v = set_key(self.aily_env_path, "LLM_TEMPERATURE", value)
         return res
+    
+    def get_stt_url(self):
+        return os.getenv("STT_URL", "")
+
+    def set_stt_url(self, value):
+        os.environ["STT_URL"] = value
+        res, k, v = set_key(self.aily_env_path, "STT_URL", value)
+        return res
 
     def get_stt_model(self):
         return os.getenv("STT_MODEL", "")
@@ -120,6 +136,14 @@ class AilyCtl:
     def set_stt_key(self, value):
         os.environ["STT_KEY"] = value
         res, k, v = set_key(self.aily_env_path, "STT_KEY", value)
+        return res
+    
+    def get_tts_url(self):
+        return os.getenv("TTS_URL", "")
+    
+    def set_tts_url(self, value):
+        os.environ["TTS_URL"] = value
+        res, k, v = set_key(self.aily_env_path, "TTS_URL", value)
         return res
 
     def get_tts_model(self):

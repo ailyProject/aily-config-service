@@ -8,6 +8,52 @@ from loguru import logger
 from utils import AilyCtl, ConfigLoad
 
 
+class ChrLLMUrl(Characteristic):
+    def __init__(self, uuid):
+        Characteristic.__init__(
+            self,
+            {
+                "uuid": uuid,
+                "properties": ["read", "write", "notify"],
+                "value": None,
+            },
+        )
+        self._value = None
+
+    def onReadRequest(self, offset, callback):
+        try:
+            data = self.get_llm_url()
+            logger.info("ChrLLMUrl - onReadRequest: value = " + str(data))
+            # 获取当前ip地址
+            self._value = bytes(data, "utf8")
+            callback(Characteristic.RESULT_SUCCESS, self._value)
+        except Exception as e:
+            logger.error(f"ChrLLMUrl - onReadRequest: {e}")
+            callback(Characteristic.RESULT_UNLIKELY_ERROR, None)
+
+    def onWriteRequest(self, data, offset, withoutResponse, callback):
+        try:
+            logger.info("ChrLLMUrl - onWriteRequest: value = " + str(data))
+            data = data.decode("utf-8")
+
+            if data:
+                aily = AilyCtl()
+                aily.set_llm_url(data)
+
+            callback(Characteristic.RESULT_SUCCESS)
+        except Exception as e:
+            logger.error(f"ChrLLMUrl - onWriteRequest: {e}")
+            callback(Characteristic.RESULT_UNLIKELY_ERROR)
+
+    @staticmethod
+    def get_llm_url():
+        try:
+            ctl = AilyCtl()
+            return ctl.get_llm_url()
+        except Exception as e:
+            return "N/A"
+
+
 class ChrLLMModel(Characteristic):
     def __init__(self, uuid):
         Characteristic.__init__(
@@ -43,21 +89,21 @@ class ChrLLMModel(Characteristic):
         except Exception as e:
             logger.error(f"ChrLLMModel - onWriteRequest: {e}")
             callback(Characteristic.RESULT_UNLIKELY_ERROR)
-    
+
     def onSubscribe(self, maxValueSize, updateValueCallback):
-        print('EchoCharacteristic - onSubscribe')
+        print("EchoCharacteristic - onSubscribe")
         self._updateValueCallback = updateValueCallback
-        
+
         data = self.get_llm_model()
         logger.info("ChrLLMModel - onReadRequest: value = " + str(data))
         self._value = bytes(data, "utf8")
-        
+
         if self._updateValueCallback:
             self._updateValueCallback(self._value)
-    
+
     def onUnsubscribe(self):
-        print('EchoCharacteristic - onUnsubscribe');
-        
+        print("EchoCharacteristic - onUnsubscribe")
+
         self._loop = False
         self._updateValueCallback = None
 
@@ -253,7 +299,7 @@ class ChrLLMModelOptions(Characteristic):
         logger.info("ChrLLMModelOptions - onUnsubscribe")
         self._updateValueCallback = None
         self.stop_sending()
-    
+
     def start_sending(self, interval=0.1):
         if self._timer is not None:
             self._timer.cancel()
@@ -282,6 +328,6 @@ class ChrLLMModelOptions(Characteristic):
         else:
             # self._updateValueCallback(bytes(str([]), "utf-8"))
             pass
-        
+
         self._updateValueCallback(bytes("EOF", "utf-8"))
         self.stop_sending()

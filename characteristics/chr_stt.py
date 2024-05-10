@@ -8,6 +8,45 @@ from loguru import logger
 from utils import AilyCtl, ConfigLoad
 
 
+class ChrSTTUrl(Characteristic):
+    def __init__(self, uuid):
+        Characteristic.__init__(
+            self,
+            {
+                "uuid": uuid,
+                "properties": ["read", "write", "notify"],
+                "value": None,
+            },
+        )
+        self._value = None
+
+    def onReadRequest(self, offset, callback):
+        try:
+            if self._value:
+                callback(Characteristic.RESULT_SUCCESS, self._value)
+            else:
+                aily = AilyCtl()
+                self._value = bytes(aily.get_stt_url(), "utf8")
+                callback(Characteristic.RESULT_SUCCESS, self._value)
+        except Exception as e:
+            logger.error(f"ChrSttUrl - onReadRequest: {e}")
+            callback(Characteristic.RESULT_UNLIKELY_ERROR, None)
+
+    def onWriteRequest(self, data, offset, withoutResponse, callback):
+        try:
+            self._value = data
+            data = data.decode("utf-8")
+            logger.info("ChrSttUrl - onWriteRequest: value = " + str(data))
+
+            aily = AilyCtl()
+            aily.set_stt_url(data)
+
+            callback(Characteristic.RESULT_SUCCESS)
+        except Exception as e:
+            logger.error(f"ChrSttUrl - onWriteRequest: {e}")
+            callback(Characteristic.RESULT_UNLIKELY_ERROR)
+
+
 class ChrSTTModel(Characteristic):
     def __init__(self, uuid):
         Characteristic.__init__(
