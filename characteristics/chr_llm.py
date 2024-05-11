@@ -300,7 +300,7 @@ class ChrLLMModelOptions(Characteristic):
         self._updateValueCallback = None
         self.stop_sending()
 
-    def start_sending(self, interval=0.1):
+    def start_sending(self, interval=1):
         if self._timer is not None:
             self._timer.cancel()
 
