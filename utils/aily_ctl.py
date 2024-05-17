@@ -175,13 +175,15 @@ class AilyCtl:
         # 重启aily服务
         os.system(f"sudo supervisorctl stop {self.aily_supervisor_name}")
         os.system(f"sudo supervisorctl start {self.aily_supervisor_name}")
-
-    def start_get_logs(self):
+    
+    def get_first_log(self):
+        logger.debug("get_first_log")
         self.log_cur_page = 1
+        return self.get_logs()
 
     def get_logs(self, page_size=1):
         if not os.environ.get("DB_NAME"):
-            return []
+            return None
 
         if not os.path.isabs(os.environ.get("DB_NAME")):
             # aily_path = Path(self.aily_path).parent
@@ -191,23 +193,32 @@ class AilyCtl:
         else:
             db_path = os.environ.get("DB_NAME")
 
-        conn = sqlite3.connect(db_path)
-        cursor = conn.cursor()
+        logger.debug(f"db_path: {db_path}")
 
-        cursor.execute("SELECT COUNT(*) FROM conversations")
-        total = cursor.fetchone()[0]
-        if total == 0 or total < (self.log_cur_page - 1) * page_size:
-            return []
+        try:
+            conn = sqlite3.connect(db_path)
+            cursor = conn.cursor()
 
-        cursor.execute(
-            "SELECT role, msg FROM conversations ORDER BY created_at ASC LIMIT ? OFFSET ?",
-            (page_size, (self.log_cur_page - 1) * page_size),
-        )
+            cursor.execute("SELECT COUNT(*) FROM conversations")
+            total = cursor.fetchone()[0]
+            if total == 0 or total < (self.log_cur_page - 1) * page_size:
+                return None
 
-        fetchdata = cursor.fetchall()
-        if fetchdata:
-            self.log_cur_page += 1
-        return fetchdata
+            cursor.execute(
+                "SELECT role, msg FROM conversations ORDER BY created_at ASC LIMIT ? OFFSET ?",
+                (page_size, (self.log_cur_page - 1) * page_size),
+            )
+
+            fetchdata = cursor.fetchall()
+            if fetchdata:
+                data = {"role": fetchdata[0][0], "msg": fetchdata[0][1]}
+                self.log_cur_page += 1
+                return data
+
+            return None
+        except Exception as e:
+            logger.error(f"get_logs: {e}")
+            return None
 
     def get_status(self):
         # 获取superivsor中aily服务的状态

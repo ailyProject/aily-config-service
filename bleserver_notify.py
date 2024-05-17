@@ -23,7 +23,7 @@ aily_ctl = AilyCtl()
 conf_ctl = ConfigCtl()
 
 logger.add(
-    "log.log",
+    "conf_service.log",
     format="{time} {level} {message}",
     level="DEBUG",
     rotation="10 MB",
@@ -63,6 +63,7 @@ AILY_CONVERSATION_UUID = "123e4567-e89b-12d3-a456-00805f9b350a"
 
 
 NOTIFY_CHRS = {
+    DEVICE_ID_UUID: DeviceCtl.get_deviceid,
     BATTERY_UUID: DeviceCtl.get_battery,
     DISK_USAGE_UUID: DeviceCtl.get_disk_usage,
     POWER_UUID: DeviceCtl.get_power,
@@ -73,6 +74,7 @@ NOTIFY_CHRS = {
     IP_UUID: DeviceCtl.get_ip,
     LLM_MODEL_UUID: aily_ctl.get_llm_model,
     AILY_CONVERSATION_UUID: aily_ctl.get_logs,
+    AILY_STATUS_UUID: aily_ctl.get_status,
 }
 
 READABLE_CHRS = {
@@ -88,6 +90,7 @@ READABLE_CHRS = {
     TTS_MODEL_UUID: aily_ctl.get_tts_model,
     TTS_KEY_UUID: aily_ctl.get_tts_key,
     TTS_ROLE_UUID: aily_ctl.get_tts_role,
+    AILY_CONVERSATION_UUID: aily_ctl.get_first_log,
 }
 
 WRITEABLE_CHRS = {
@@ -149,8 +152,22 @@ async def notify(server):
     while True:
         if await server.is_connected():
             for key, func in NOTIFY_CHRS.items():
+                if key == AILY_CONVERSATION_UUID and aily_ctl.log_cur_page == 1:
+                    continue
+                
                 chr = server.get_characteristic(key)
-                chr.value = str(func()).encode()
+                value = func()
+                if value is None:
+                    continue
+                
+                if isinstance(value, str):
+                    value = value.encode()
+                elif isinstance(value, dict):
+                    value = json.dumps(value).encode()
+                else:
+                    value = str(value).encode()
+                
+                chr.value = value
                 server.update_value(SERVICE_UUID, key)
 
         await asyncio.sleep(3)
@@ -161,7 +178,8 @@ async def run(loop):
     gatt: Dict = {
         SERVICE_UUID: {
             DEVICE_ID_UUID: {
-                "Properties": GATTCharacteristicProperties.read,
+                "Properties": GATTCharacteristicProperties.read
+                | GATTCharacteristicProperties.notify,
                 "Permissions": GATTAttributePermissions.readable,
                 "Value": DeviceCtl.get_deviceid().encode(),
             }, 
@@ -339,7 +357,8 @@ async def run(loop):
                 "Value": "".encode(),
             },
             AILY_CONVERSATION_UUID: {
-                "Properties": GATTCharacteristicProperties.notify,
+                "Properties": GATTCharacteristicProperties.notify
+                | GATTCharacteristicProperties.read,
                 "Permissions": GATTAttributePermissions.readable,
                 "Value": "".encode(),
             },
