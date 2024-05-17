@@ -61,6 +61,7 @@ class AilyCtl:
             return False
 
     def __init__(self) -> None:
+        self.log_cur_page = 1
         load_res = self.load_aily_conf()
         if not load_res:
             pass
@@ -73,17 +74,17 @@ class AilyCtl:
         #         pass
         #         # raise RuntimeError("Failed to load AILY_CONF_PATH")
         #     AilyCtl._instance = self
-        
+
     def get_llm_url(self):
         return os.getenv("LLM_URL", "")
-    
+
     def set_llm_url(self, value):
         os.environ["LLM_URL"] = value
         res, k, v = set_key(self.aily_env_path, "LLM_URL", value)
         return res
 
     def get_llm_model(self):
-        return os.getenv("LLM_MODEL", "")
+        return os.getenv("LLM_MODEL") or ""
 
     def set_llm_model(self, value):
         os.environ["LLM_MODEL"] = value
@@ -91,7 +92,7 @@ class AilyCtl:
         return res
 
     def get_llm_key(self):
-        return os.getenv("LLM_KEY", "")
+        return os.getenv("LLM_KEY") or ""
 
     def set_llm_key(self, value):
         os.environ["LLM_KEY"] = value
@@ -99,7 +100,7 @@ class AilyCtl:
         return res
 
     def get_llm_preprompt(self):
-        return os.getenv("LLM_PRE_PROMPT", "")
+        return os.getenv("LLM_PRE_PROMPT") or ""
 
     def set_llm_preprompt(self, value):
         os.environ["LLM_PRE_PROMPT"] = value
@@ -107,15 +108,15 @@ class AilyCtl:
         return res
 
     def get_llm_temp(self):
-        return os.getenv("LLM_TEMPERATURE", "")
+        return os.getenv("LLM_TEMPERATURE") or ""
 
     def set_llm_temp(self, value):
         os.environ["LLM_TEMPERATURE"] = value
         res, k, v = set_key(self.aily_env_path, "LLM_TEMPERATURE", value)
         return res
-    
+
     def get_stt_url(self):
-        return os.getenv("STT_URL", "")
+        return os.getenv("STT_URL") or ""
 
     def set_stt_url(self, value):
         os.environ["STT_URL"] = value
@@ -123,7 +124,7 @@ class AilyCtl:
         return res
 
     def get_stt_model(self):
-        return os.getenv("STT_MODEL", "")
+        return os.getenv("STT_MODEL") or ""
 
     def set_stt_model(self, value):
         os.environ["STT_MODEL"] = value
@@ -131,23 +132,23 @@ class AilyCtl:
         return res
 
     def get_stt_key(self):
-        return os.getenv("STT_KEY", "")
+        return os.getenv("STT_KEY") or ""
 
     def set_stt_key(self, value):
         os.environ["STT_KEY"] = value
         res, k, v = set_key(self.aily_env_path, "STT_KEY", value)
         return res
-    
+
     def get_tts_url(self):
-        return os.getenv("TTS_URL", "")
-    
+        return os.getenv("TTS_URL") or ""
+
     def set_tts_url(self, value):
         os.environ["TTS_URL"] = value
         res, k, v = set_key(self.aily_env_path, "TTS_URL", value)
         return res
 
     def get_tts_model(self):
-        return os.getenv("TTS_MODEL", "")
+        return os.getenv("TTS_MODEL") or ""
 
     def set_tts_model(self, value):
         os.environ["TTS_MODEL"] = value
@@ -155,7 +156,7 @@ class AilyCtl:
         return res
 
     def get_tts_key(self):
-        return os.getenv("TTS_KEY", "")
+        return os.getenv("TTS_KEY") or ""
 
     def set_tts_key(self, value):
         os.environ["TTS_KEY"] = value
@@ -163,19 +164,22 @@ class AilyCtl:
         return res
 
     def get_tts_role(self):
-        return os.getenv("TTS_ROLE", "")
+        return os.getenv("TTS_ROLE") or ""
 
     def set_tts_role(self, value):
         os.environ["TTS_ROLE"] = value
         res, k, v = set_key(self.aily_env_path, "TTS_ROLE", value)
         return res
 
-    def save(self):
+    def save(self, value):
         # 重启aily服务
         os.system(f"sudo supervisorctl stop {self.aily_supervisor_name}")
         os.system(f"sudo supervisorctl start {self.aily_supervisor_name}")
 
-    def get_logs(self, page=1, page_size=1):
+    def start_get_logs(self):
+        self.log_cur_page = 1
+
+    def get_logs(self, page_size=1):
         if not os.environ.get("DB_NAME"):
             return []
 
@@ -192,14 +196,18 @@ class AilyCtl:
 
         cursor.execute("SELECT COUNT(*) FROM conversations")
         total = cursor.fetchone()[0]
-        if total == 0 or total < (page - 1) * page_size:
+        if total == 0 or total < (self.log_cur_page - 1) * page_size:
             return []
 
         cursor.execute(
             "SELECT role, msg FROM conversations ORDER BY created_at ASC LIMIT ? OFFSET ?",
-            (page_size, (page - 1) * page_size),
+            (page_size, (self.log_cur_page - 1) * page_size),
         )
-        return cursor.fetchall()
+
+        fetchdata = cursor.fetchall()
+        if fetchdata:
+            self.log_cur_page += 1
+        return fetchdata
 
     def get_status(self):
         # 获取superivsor中aily服务的状态

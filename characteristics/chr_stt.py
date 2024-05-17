@@ -5,7 +5,7 @@ import time
 import threading
 from pybleno import Characteristic
 from loguru import logger
-from utils import AilyCtl, ConfigLoad
+from utils import AilyCtl, ConfigCtl
 
 
 class ChrSTTUrl(Characteristic):
@@ -155,7 +155,7 @@ class ChrSTTModelOptions(Characteristic):
             # with open(conf_file, "r") as f:
             #     conf = yaml.safe_load(f)
             # return conf["stt"]["models"]
-            config_load = ConfigLoad()
+            config_load = ConfigCtl()
             return config_load.get_stt_models()
         except Exception as e:
             logger.error(f"ChrSTTModelOptions - get_conf: {e}")

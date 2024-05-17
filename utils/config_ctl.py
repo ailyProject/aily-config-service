@@ -17,7 +17,7 @@ def singleton(cls):
 
 
 @singleton
-class ConfigLoad:
+class ConfigCtl:
     def __init__(self):
         self.config = os.getenv("AILY_CONFIG_PATH")
         self.data = None

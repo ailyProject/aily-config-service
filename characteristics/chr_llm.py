@@ -5,7 +5,7 @@ import time
 import threading
 from pybleno import Characteristic
 from loguru import logger
-from utils import AilyCtl, ConfigLoad
+from utils import AilyCtl, ConfigCtl
 
 
 class ChrLLMUrl(Characteristic):
@@ -284,7 +284,7 @@ class ChrLLMModelOptions(Characteristic):
             # with open(conf_file, "r") as f:
             #     conf = yaml.safe_load(f)
             # return conf["llm"]["models"]
-            config_load = ConfigLoad()
+            config_load = ConfigCtl()
             return config_load.get_llm_models()
         except Exception as e:
             logger.error(f"ChrLLMModelOptions - get_conf: {e}")

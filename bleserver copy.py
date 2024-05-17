@@ -32,8 +32,17 @@ def read_value():
     :return: list of uint8 values
     """
     cpu_value = random.randrange(3200, 5310, 10) / 100
-    return list(int(cpu_value * 100).to_bytes(2,
-                                              byteorder='little', signed=True))
+    return str(cpu_value).encode('utf-8')
+
+
+def on_read():
+    print("on_read")
+    return read_value()
+
+
+def on_update(value, characteristic):
+    print("on_update: {0}".format(value))
+    print("chr: {0}".format(characteristic))
 
 
 def update_value(characteristic):
@@ -43,10 +52,13 @@ def update_value(characteristic):
     :param characteristic:
     :return: boolean to indicate if timer should continue
     """
+    
+
     # read/calculate new value.
     new_value = read_value()
+    print("send value: {0}".format(new_value))
     # Causes characteristic to be updated and send notification
-    characteristic.set_value(new_value)
+    characteristic.set_value(list(new_value))
     # Return True to continue notifying. Return a False will stop notifications
     # Getting the value from the characteristic of if it is notifying
     return characteristic.is_notifying
@@ -61,6 +73,7 @@ def notify_callback(notifying, characteristic):
     :param characteristic: The python object for this characteristic
     """
     if notifying:
+        print("Starting notifications")
         async_tools.add_timer_seconds(2, update_value, characteristic)
 
 
@@ -80,9 +93,9 @@ def main(adapter_address):
     # Add characteristic
     cpu_monitor.add_characteristic(srv_id=1, chr_id=1, uuid=CPU_TMP_CHRC,
                                    value=[], notifying=False,
-                                   flags=['read', 'indecate'],
+                                   flags=['read', 'notify', 'write'],
                                    read_callback=read_value,
-                                   write_callback=None,
+                                   write_callback=on_update,
                                    notify_callback=notify_callback
                                    )
     # Add descriptor
