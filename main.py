@@ -1,6 +1,6 @@
 import asyncio
 import json
-import os
+import time
 
 from typing import Any, Dict
 from loguru import logger
@@ -63,18 +63,54 @@ AILY_CONVERSATION_UUID = "123e4567-e89b-12d3-a456-00805f9b350a"
 
 
 NOTIFY_CHRS = {
-    DEVICE_ID_UUID: DeviceCtl.get_deviceid,
-    BATTERY_UUID: DeviceCtl.get_battery,
-    DISK_USAGE_UUID: DeviceCtl.get_disk_usage,
-    POWER_UUID: DeviceCtl.get_power,
-    RAM_USAGE_UUID: DeviceCtl.get_ram_usage,
-    CPU_TEMP_UUID: DeviceCtl.get_cpu_tempture,
-    CPU_USAGE_UUID: DeviceCtl.get_cpu_usage,
-    NETWORK_UUID: DeviceCtl.get_network,
-    IP_UUID: DeviceCtl.get_ip,
-    LLM_MODEL_UUID: aily_ctl.get_llm_model,
-    AILY_CONVERSATION_UUID: aily_ctl.get_logs,
-    AILY_STATUS_UUID: aily_ctl.get_status,
+    DEVICE_ID_UUID: {
+        "func": DeviceCtl.get_deviceid,
+        "sleep": 60,
+    },
+    BATTERY_UUID: {
+        "func": DeviceCtl.get_battery,
+        "sleep": 60,
+    },
+    DISK_USAGE_UUID: {
+        "func": DeviceCtl.get_disk_usage,
+        "sleep": 60,
+    },
+    POWER_UUID: {
+        "func": DeviceCtl.get_power,
+        "sleep": 60,
+    },
+    RAM_USAGE_UUID: {
+        "func": DeviceCtl.get_ram_usage,
+        "sleep": 10,
+    },
+    CPU_TEMP_UUID: {
+        "func": DeviceCtl.get_cpu_tempture,
+        "sleep": 10,
+    },
+    CPU_USAGE_UUID: {
+        "func": DeviceCtl.get_cpu_usage,
+        "sleep": 10,
+    },
+    NETWORK_UUID: {
+        "func": DeviceCtl.get_network,
+        "sleep": 3,
+    },
+    IP_UUID: {
+        "func": DeviceCtl.get_ip,
+        "sleep": 3,
+    },
+    LLM_MODEL_UUID: {
+        "func": aily_ctl.get_llm_model,
+        "sleep": 15,
+    },
+    AILY_CONVERSATION_UUID: {
+        "func": aily_ctl.get_logs,
+        "sleep": 1,
+    },
+    AILY_STATUS_UUID: {
+        "func": aily_ctl.get_status,
+        "sleep": 20,
+    },
 }
 
 READABLE_CHRS = {
@@ -139,27 +175,23 @@ def write_request(characteristic: BlessGATTCharacteristic, value: Any, **kwargs)
         return
     
     func(value.decode("utf-8") if value else None)
-    
-    
-    # characteristic.value = value
-    # logger.debug(f"Char value set to {characteristic.value}")
-    # if characteristic.value == b'\x0f':
-    # logger.debug("Nice")
-    # trigger.set()
-
 
 async def notify(server):
+    current_time = 0
     while True:
         if await server.is_connected():
             for key, func in NOTIFY_CHRS.items():
                 if key == AILY_CONVERSATION_UUID and aily_ctl.log_cur_page == 1:
                     continue
                 
-                chr = server.get_characteristic(key)
-                value = func()
-                if value is None:
+                if current_time == 0 or current_time % func["sleep"] == 0:
+                    value = func()
+                    if value is None:
+                        continue
+                else:
                     continue
-                
+
+                chr = server.get_characteristic(key)
                 if isinstance(value, str):
                     value = value.encode()
                 elif isinstance(value, dict):
@@ -170,7 +202,8 @@ async def notify(server):
                 chr.value = value
                 server.update_value(SERVICE_UUID, key)
 
-        await asyncio.sleep(3)
+        await asyncio.sleep(1)
+        current_time = int(time.time())
 
 
 async def run(loop):
