@@ -1,0 +1,10 @@
+[Unit]
+Description=Bluetools Agent Service
+
+[Service]
+ExecStart=bt-agent -c NoInputNoOutput
+Restart=always
+User=pi
+
+[Install]
+WantedBy=multi-user.target
