@@ -240,20 +240,17 @@ async def notify(server):
                     value = json.dumps(value).encode()
                 else:
                     value = str(value).encode()
-
-                while True:
-                    if len(value) > 120:
-                        chr.value = value[:120]
-                        server.update_value(SERVICE_UUID, key)
-                        value = value[120:]
-                    else:
-                        chr.value = value
-                        server.update_value(SERVICE_UUID, key)
-                        break
                 
-                chr.value = "EOF".encode()
-                # chr.value = value
-                server.update_value(SERVICE_UUID, key)
+                
+                if key == AILY_CONVERSATION_UUID:
+                    for i in range(0, len(value), 120):
+                        chr.value = value[i:i+120]
+                        server.update_value(SERVICE_UUID, key)
+                        await asyncio.sleep(0.5)
+                    chr.value = "EOF".encode()
+                else:
+                    chr.value = value
+                    server.update_value(SERVICE_UUID, key)
 
         await asyncio.sleep(1)
         current_time = int(time.time())
