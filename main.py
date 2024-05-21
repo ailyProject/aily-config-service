@@ -175,10 +175,10 @@ def emit_update(name):
 
 
 def read_request(characteristic: BlessGATTCharacteristic, **kwargs):
-    logger.debug("read characteristic: {0}".format(characteristic.uuid))
+    # logger.debug("read characteristic: {0}".format(characteristic.uuid))
     func = READABLE_CHRS.get(characteristic.uuid)
     if func is None:
-        logger.debug("Characteristic is not readable")
+        # logger.debug("Characteristic is not readable")
         return characteristic.value
 
     value = func()
@@ -190,7 +190,7 @@ def read_request(characteristic: BlessGATTCharacteristic, **kwargs):
         value = str(value).encode()
 
     characteristic.value = value
-    logger.debug(f"Char value: {characteristic.value}")
+    # logger.debug(f"Char value: {characteristic.value}")
     return characteristic.value
 
 
