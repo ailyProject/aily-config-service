@@ -19,6 +19,7 @@ from utils.config_ctl import ConfigCtl
 
 load_dotenv(".env")
 
+device_ctl = DeviceCtl()
 aily_ctl = AilyCtl()
 conf_ctl = ConfigCtl()
 
@@ -68,39 +69,39 @@ UPDATE_RES_UUID = "123e4567-e89b-12d3-a456-426614174011"
 
 NOTIFY_CHRS = {
     DEVICE_ID_UUID: {
-        "func": DeviceCtl.get_deviceid,
+        "func": device_ctl.get_deviceid,
         "sleep": 60,
     },
     BATTERY_UUID: {
-        "func": DeviceCtl.get_battery,
+        "func": device_ctl.get_battery,
         "sleep": 60,
     },
     DISK_USAGE_UUID: {
-        "func": DeviceCtl.get_disk_usage,
+        "func": device_ctl.get_disk_usage,
         "sleep": 60,
     },
     POWER_UUID: {
-        "func": DeviceCtl.get_power,
+        "func": device_ctl.get_power,
         "sleep": 60,
     },
     RAM_USAGE_UUID: {
-        "func": DeviceCtl.get_ram_usage,
+        "func": device_ctl.get_ram_usage,
         "sleep": 10,
     },
     CPU_TEMP_UUID: {
-        "func": DeviceCtl.get_cpu_tempture,
+        "func": device_ctl.get_cpu_tempture,
         "sleep": 10,
     },
     CPU_USAGE_UUID: {
-        "func": DeviceCtl.get_cpu_usage,
+        "func": device_ctl.get_cpu_usage,
         "sleep": 10,
     },
     # NETWORK_UUID: {
-    #     "func": DeviceCtl.get_network,
+    #     "func": device_ctl.get_network,
     #     "sleep": 3,
     # },
     # IP_UUID: {
-    #     "func": DeviceCtl.get_ip,
+    #     "func": device_ctl.get_ip,
     #     "sleep": 3,
     # },
     LLM_MODEL_UUID: {
@@ -131,18 +132,18 @@ READABLE_CHRS = {
     TTS_KEY_UUID: aily_ctl.get_tts_key,
     TTS_ROLE_UUID: aily_ctl.get_tts_role,
     AILY_CONVERSATION_UUID: aily_ctl.get_first_log,
-    IP_UUID: DeviceCtl.get_ip,
-    NETWORK_UUID: DeviceCtl.get_network,
-    CPU_USAGE_UUID: DeviceCtl.get_cpu_usage,
-    CPU_TEMP_UUID: DeviceCtl.get_cpu_tempture,
-    RAM_USAGE_UUID: DeviceCtl.get_ram_usage,
-    DISK_USAGE_UUID: DeviceCtl.get_disk_usage,
-    BATTERY_UUID: DeviceCtl.get_battery,
-    POWER_UUID: DeviceCtl.get_power,
+    IP_UUID: device_ctl.get_ip,
+    NETWORK_UUID: device_ctl.get_network,
+    CPU_USAGE_UUID: device_ctl.get_cpu_usage,
+    CPU_TEMP_UUID: device_ctl.get_cpu_tempture,
+    RAM_USAGE_UUID: device_ctl.get_ram_usage,
+    DISK_USAGE_UUID: device_ctl.get_disk_usage,
+    BATTERY_UUID: device_ctl.get_battery,
+    POWER_UUID: device_ctl.get_power,
 }
 
 WRITEABLE_CHRS = {
-    WIFI_UUID: DeviceCtl.set_wifi,
+    WIFI_UUID: device_ctl.set_wifi,
     LLM_MODEL_UUID: aily_ctl.set_llm_model,
     LLM_URL_UUID: aily_ctl.set_llm_url,
     LLM_KEY_UUID: aily_ctl.set_llm_key,
@@ -169,8 +170,8 @@ def emit_update(name, value: str = None):
         network_chr = BLE_SERVER.get_characteristic(NETWORK_UUID)
         ip_chr = BLE_SERVER.get_characteristic(IP_UUID)
 
-        network_chr.value = DeviceCtl.get_network().encode()
-        ip_chr.value = DeviceCtl.get_ip().encode()
+        network_chr.value = device_ctl.get_network().encode()
+        ip_chr.value = device_ctl.get_ip().encode()
 
         BLE_SERVER.update_value(SERVICE_UUID, NETWORK_UUID)
         BLE_SERVER.update_value(SERVICE_UUID, IP_UUID)
@@ -206,9 +207,8 @@ def write_request(characteristic: BlessGATTCharacteristic, value: Any, **kwargs)
     if func is None:
         logger.debug("Characteristic is not writeable")
         return
-
+    
     res = func(value.decode("utf-8") if value else None)
-    logger.debug(f"Write result: {res}")
 
     if characteristic.uuid == WIFI_UUID:
         if res == 1:
@@ -256,43 +256,43 @@ async def run(loop):
                 "Properties": GATTCharacteristicProperties.read
                 | GATTCharacteristicProperties.notify,
                 "Permissions": GATTAttributePermissions.readable,
-                "Value": DeviceCtl.get_deviceid().encode(),
+                "Value": device_ctl.get_deviceid().encode(),
             },
             BATTERY_UUID: {
                 "Properties": GATTCharacteristicProperties.read
                 | GATTCharacteristicProperties.notify,
                 "Permissions": GATTAttributePermissions.readable,
-                "Value": str(DeviceCtl.get_battery()).encode(),
+                "Value": str(device_ctl.get_battery()).encode(),
             },
             DISK_USAGE_UUID: {
                 "Properties": GATTCharacteristicProperties.read
                 | GATTCharacteristicProperties.notify,
                 "Permissions": GATTAttributePermissions.readable,
-                "Value": str(DeviceCtl.get_disk_usage()).encode(),
+                "Value": str(device_ctl.get_disk_usage()).encode(),
             },
             POWER_UUID: {
                 "Properties": GATTCharacteristicProperties.read
                 | GATTCharacteristicProperties.notify,
                 "Permissions": GATTAttributePermissions.readable,
-                "Value": str(DeviceCtl.get_power()).encode(),
+                "Value": str(device_ctl.get_power()).encode(),
             },
             RAM_USAGE_UUID: {
                 "Properties": GATTCharacteristicProperties.read
                 | GATTCharacteristicProperties.notify,
                 "Permissions": GATTAttributePermissions.readable,
-                "Value": str(DeviceCtl.get_ram_usage()).encode(),
+                "Value": str(device_ctl.get_ram_usage()).encode(),
             },
             CPU_TEMP_UUID: {
                 "Properties": GATTCharacteristicProperties.read
                 | GATTCharacteristicProperties.notify,
                 "Permissions": GATTAttributePermissions.readable,
-                "Value": str(DeviceCtl.get_cpu_tempture()).encode(),
+                "Value": str(device_ctl.get_cpu_tempture()).encode(),
             },
             CPU_USAGE_UUID: {
                 "Properties": GATTCharacteristicProperties.read
                 | GATTCharacteristicProperties.notify,
                 "Permissions": GATTAttributePermissions.readable,
-                "Value": str(DeviceCtl.get_cpu_usage()).encode(),
+                "Value": str(device_ctl.get_cpu_usage()).encode(),
             },
             NETWORK_UUID: {
                 "Properties": GATTCharacteristicProperties.read

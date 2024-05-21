@@ -106,16 +106,17 @@ class DeviceCtl:
     
     def _scan_wifi(self):
         try:
+            logger.debug("Scanning wifi")
             subprocess.check_output(["sudo", "nmcli", "dev", "wifi", "rescan"])
         except Exception as e:
             logger.error("Failed to scan wifi: {0}".format(e))
             return "N/A"
     
     def set_wifi(self, value: str):
+        logger.debug("Setting wifi: {0}".format(value))
         data = json.loads(value)
         if not data:
             return
-        
         ssid = data.get("ssid")
         password = data.get("password")
         if not ssid or not password:
@@ -135,7 +136,8 @@ class DeviceCtl:
             if ssid in ssid_list:
                 find = True
                 break
-
+            
+            logger.debug("SSID: {0} not found. Retry: {1}".format(ssid, retry))
             retry -= 1
         
         if not find:
