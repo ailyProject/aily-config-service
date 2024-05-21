@@ -131,6 +131,12 @@ READABLE_CHRS = {
     AILY_CONVERSATION_UUID: aily_ctl.get_first_log,
     IP_UUID: DeviceCtl.get_ip,
     NETWORK_UUID: DeviceCtl.get_network,
+    CPU_USAGE_UUID: DeviceCtl.get_cpu_usage,
+    CPU_TEMP_UUID: DeviceCtl.get_cpu_tempture,
+    RAM_USAGE_UUID: DeviceCtl.get_ram_usage,
+    DISK_USAGE_UUID: DeviceCtl.get_disk_usage,
+    BATTERY_UUID: DeviceCtl.get_battery,
+    POWER_UUID: DeviceCtl.get_power,
 }
 
 WRITEABLE_CHRS = {
@@ -195,7 +201,8 @@ def write_request(characteristic: BlessGATTCharacteristic, value: Any, **kwargs)
         logger.debug("Characteristic is not writeable")
         return
 
-    func(value.decode("utf-8") if value else None)
+    res = func(value.decode("utf-8") if value else None)
+    logger.debug(f"Write result: {res}")
 
     if characteristic.uuid == WIFI_UUID:
         emit_update("wifi")
