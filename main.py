@@ -30,6 +30,8 @@ logger.add(
     compression="zip",
 )
 
+BLE_SERVER: any
+
 SERVICE_UUID = "123e4567-e89b-12d3-a456-426614174000"
 DEVICE_ID_UUID = "123e4567-e89b-12d3-a456-426614174001"
 BATTERY_UUID = "123e4567-e89b-12d3-a456-426614174009"
@@ -91,14 +93,14 @@ NOTIFY_CHRS = {
         "func": DeviceCtl.get_cpu_usage,
         "sleep": 10,
     },
-    NETWORK_UUID: {
-        "func": DeviceCtl.get_network,
-        "sleep": 3,
-    },
-    IP_UUID: {
-        "func": DeviceCtl.get_ip,
-        "sleep": 3,
-    },
+    # NETWORK_UUID: {
+    #     "func": DeviceCtl.get_network,
+    #     "sleep": 3,
+    # },
+    # IP_UUID: {
+    #     "func": DeviceCtl.get_ip,
+    #     "sleep": 3,
+    # },
     LLM_MODEL_UUID: {
         "func": aily_ctl.get_llm_model,
         "sleep": 15,
@@ -147,13 +149,30 @@ WRITEABLE_CHRS = {
 }
 
 
+def emit_update(name):
+    global BLE_SERVER
+    if BLE_SERVER is None:
+        logger.warning("BLE server is not ready")
+        return
+
+    if name == "wifi":
+        network_chr = BLE_SERVER.get_characteristic(NETWORK_UUID)
+        ip_chr = BLE_SERVER.get_characteristic(IP_UUID)
+
+        network_chr.value = DeviceCtl.get_network().encode()
+        ip_chr.value = DeviceCtl.get_ip().encode()
+
+        BLE_SERVER.update_value(SERVICE_UUID, NETWORK_UUID)
+        BLE_SERVER.update_value(SERVICE_UUID, IP_UUID)
+
+
 def read_request(characteristic: BlessGATTCharacteristic, **kwargs):
     logger.debug("read characteristic: {0}".format(characteristic.uuid))
     func = READABLE_CHRS.get(characteristic.uuid)
     if func is None:
         logger.debug("Characteristic is not readable")
         return characteristic.value
-    
+
     value = func()
     if isinstance(value, str):
         value = value.encode()
@@ -161,7 +180,7 @@ def read_request(characteristic: BlessGATTCharacteristic, **kwargs):
         value = json.dumps(value).encode()
     else:
         value = str(value).encode()
-    
+
     characteristic.value = value
     logger.debug(f"Char value: {characteristic.value}")
     return characteristic.value
@@ -173,8 +192,13 @@ def write_request(characteristic: BlessGATTCharacteristic, value: Any, **kwargs)
     if func is None:
         logger.debug("Characteristic is not writeable")
         return
-    
+
     func(value.decode("utf-8") if value else None)
+
+    if characteristic.uuid == WIFI_UUID:
+        time.sleep(3)
+        emit_update("wifi")
+
 
 async def notify(server):
     current_time = 0
@@ -183,7 +207,7 @@ async def notify(server):
             for key, item in NOTIFY_CHRS.items():
                 if key == AILY_CONVERSATION_UUID and aily_ctl.log_cur_page == 1:
                     continue
-                
+
                 if current_time == 0 or current_time % item["sleep"] == 0:
                     value = item["func"]()
                     if value is None:
@@ -198,7 +222,7 @@ async def notify(server):
                     value = json.dumps(value).encode()
                 else:
                     value = str(value).encode()
-                
+
                 chr.value = value
                 server.update_value(SERVICE_UUID, key)
 
@@ -215,7 +239,7 @@ async def run(loop):
                 | GATTCharacteristicProperties.notify,
                 "Permissions": GATTAttributePermissions.readable,
                 "Value": DeviceCtl.get_deviceid().encode(),
-            }, 
+            },
             BATTERY_UUID: {
                 "Properties": GATTCharacteristicProperties.read
                 | GATTCharacteristicProperties.notify,
@@ -410,6 +434,8 @@ async def run(loop):
     logger.debug("Waiting for someone to subscribe")
 
     try:
+        global BLE_SERVER
+        BLE_SERVER = server
         await notify(server)
     except KeyboardInterrupt:
         logger.debug("Keyboard interrupt detected")
