@@ -215,7 +215,7 @@ def write_request(characteristic: BlessGATTCharacteristic, value: Any, **kwargs)
             emit_update("wifi")
         emit_update("update", json.dumps({"type": "wifi", "status": res}))
     elif characteristic.uuid == AILY_RELOAD_UUID:
-        emit_update("update", json.dumps({"type": "aily", "status": res}))
+        emit_update("update", json.dumps({"type": "aily", "status": int(res)}))
 
 
 async def notify(server):
