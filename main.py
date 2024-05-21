@@ -180,12 +180,12 @@ async def notify(server):
     current_time = 0
     while True:
         if await server.is_connected():
-            for key, func in NOTIFY_CHRS.items():
+            for key, item in NOTIFY_CHRS.items():
                 if key == AILY_CONVERSATION_UUID and aily_ctl.log_cur_page == 1:
                     continue
                 
-                if current_time == 0 or current_time % func["sleep"] == 0:
-                    value = func()
+                if current_time == 0 or current_time % item["sleep"] == 0:
+                    value = item["func"]()
                     if value is None:
                         continue
                 else:
