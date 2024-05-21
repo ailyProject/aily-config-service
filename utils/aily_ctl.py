@@ -173,8 +173,13 @@ class AilyCtl:
 
     def save(self, value):
         # 重启aily服务
-        os.system(f"sudo supervisorctl stop {self.aily_supervisor_name}")
-        os.system(f"sudo supervisorctl start {self.aily_supervisor_name}")
+        try:
+            os.system(f"sudo supervisorctl stop {self.aily_supervisor_name}")
+            os.system(f"sudo supervisorctl start {self.aily_supervisor_name}")
+            return True
+        except Exception as e:
+            logger.error(f"aily save err: {e}")
+            return False
     
     def get_first_log(self):
         logger.debug("get_first_log")

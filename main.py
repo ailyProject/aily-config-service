@@ -63,6 +63,8 @@ AILY_STATUS_UUID = "123e4567-e89b-12d3-a456-00805f9b350b"
 AILY_RELOAD_UUID = "123e4567-e89b-12d3-a456-00805f9b3509"
 AILY_CONVERSATION_UUID = "123e4567-e89b-12d3-a456-00805f9b350a"
 
+UPDATE_RES_UUID = "123e4567-e89b-12d3-a456-426614174011"
+
 
 NOTIFY_CHRS = {
     DEVICE_ID_UUID: {
@@ -157,7 +159,7 @@ WRITEABLE_CHRS = {
 }
 
 
-def emit_update(name):
+def emit_update(name, value: str = None):
     global BLE_SERVER
     if BLE_SERVER is None:
         logger.warning("BLE server is not ready")
@@ -172,6 +174,10 @@ def emit_update(name):
 
         BLE_SERVER.update_value(SERVICE_UUID, NETWORK_UUID)
         BLE_SERVER.update_value(SERVICE_UUID, IP_UUID)
+    elif name == "update":
+        update_chr = BLE_SERVER.get_characteristic(UPDATE_RES_UUID)
+        update_chr.value = value.encode()
+        BLE_SERVER.update_value(SERVICE_UUID, UPDATE_RES_UUID)
 
 
 def read_request(characteristic: BlessGATTCharacteristic, **kwargs):
@@ -205,7 +211,11 @@ def write_request(characteristic: BlessGATTCharacteristic, value: Any, **kwargs)
     logger.debug(f"Write result: {res}")
 
     if characteristic.uuid == WIFI_UUID:
-        emit_update("wifi")
+        if res == 1:
+            emit_update("wifi")
+        emit_update("update", json.dumps({"type": "wifi", "status": res}))
+    elif characteristic.uuid == AILY_RELOAD_UUID:
+        emit_update("update", json.dumps({"type": "aily", "status": res}))
 
 
 async def notify(server):

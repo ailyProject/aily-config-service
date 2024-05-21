@@ -104,8 +104,14 @@ class DeviceCtl:
             s.close()
         return IP
     
-    @staticmethod
-    def set_wifi(value: str):
+    def _scan_wifi(self):
+        try:
+            subprocess.check_output(["sudo", "nmcli", "dev", "wifi", "rescan"])
+        except Exception as e:
+            logger.error("Failed to scan wifi: {0}".format(e))
+            return "N/A"
+    
+    def set_wifi(self, value: str):
         data = json.loads(value)
         if not data:
             return
@@ -115,20 +121,33 @@ class DeviceCtl:
         if not ssid or not password:
             return
         
-        result = subprocess.check_output(["sudo", "nmcli", "dev", "wifi", "list"])
-        ssid_list = result.decode("utf-8").split("\n")[1:]
-        ssid_list = [ssid.split()[1] for ssid in ssid_list if ssid]
+        retry = 5
+        find = False
+
+        while retry > 0:
+            self._scan_wifi()
+            
+            result = subprocess.check_output(["sudo", "nmcli", "dev", "wifi", "list"])
+            # logger.debug("Wifi list: {0}".format(result.decode("utf-8")))
+            ssid_list = result.decode("utf-8").split("\n")[1:]
+            ssid_list = [ssid.split()[1] for ssid in ssid_list if ssid]
+            
+            if ssid in ssid_list:
+                find = True
+                break
+
+            retry -= 1
         
-        if ssid not in ssid_list:
-            logger.debug("SSID: {0} not found".format(ssid))
-            return False
+        if not find:
+            logger.error("SSID: {0} not found".format(ssid))
+            return -1
 
         result = subprocess.check_output(["sudo", "nmcli", "device", "wifi", "connect", ssid, "password", password])
         if "successfully activated" in result.decode("utf-8"):
-            return True
+            return 1
         else:
             logger.debug("Failed to connect to {0}".format(ssid))
-            return False
+            return -2
 
         # config_lines = [
         #     "ctrl_interface=DIR=/var/run/wpa_supplicant GROUP=netdev",
