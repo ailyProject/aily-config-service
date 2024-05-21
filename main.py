@@ -437,6 +437,11 @@ async def run(loop):
                 "Permissions": GATTAttributePermissions.readable,
                 "Value": "".encode(),
             },
+            UPDATE_RES_UUID: {
+                "Properties": GATTCharacteristicProperties.notify,
+                "Permissions": GATTAttributePermissions.readable,
+                "Value": "".encode(),
+            },
         }
     }
 
