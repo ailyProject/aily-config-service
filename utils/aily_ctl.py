@@ -216,8 +216,7 @@ class AilyCtl:
             if fetchdata:
                 data = {"role": fetchdata[0][0], "msg": fetchdata[0][1]}
                 self.log_cur_page += 1
-                
-                logger.debug(f"get_logs: {data}")
+
                 return data
 
             return None
