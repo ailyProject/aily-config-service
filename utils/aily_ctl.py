@@ -193,8 +193,6 @@ class AilyCtl:
         else:
             db_path = os.environ.get("DB_NAME")
 
-        logger.debug(f"db_path: {db_path}")
-
         try:
             conn = sqlite3.connect(db_path)
             cursor = conn.cursor()
@@ -213,6 +211,8 @@ class AilyCtl:
             if fetchdata:
                 data = {"role": fetchdata[0][0], "msg": fetchdata[0][1]}
                 self.log_cur_page += 1
+                
+                logger.debug(f"get_logs: {data}")
                 return data
 
             return None

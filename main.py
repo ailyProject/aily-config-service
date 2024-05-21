@@ -129,6 +129,8 @@ READABLE_CHRS = {
     TTS_KEY_UUID: aily_ctl.get_tts_key,
     TTS_ROLE_UUID: aily_ctl.get_tts_role,
     AILY_CONVERSATION_UUID: aily_ctl.get_first_log,
+    IP_UUID: DeviceCtl.get_ip,
+    NETWORK_UUID: DeviceCtl.get_network,
 }
 
 WRITEABLE_CHRS = {
@@ -196,7 +198,6 @@ def write_request(characteristic: BlessGATTCharacteristic, value: Any, **kwargs)
     func(value.decode("utf-8") if value else None)
 
     if characteristic.uuid == WIFI_UUID:
-        time.sleep(3)
         emit_update("wifi")
 
 
