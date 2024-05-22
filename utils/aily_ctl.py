@@ -61,7 +61,8 @@ class AilyCtl:
             return False
 
     def __init__(self) -> None:
-        self.log_cur_page = 1
+        self.log_cur_page = 0
+        self.start_get_logs = False
         load_res = self.load_aily_conf()
         if not load_res:
             pass
@@ -181,12 +182,13 @@ class AilyCtl:
             logger.error(f"aily save err: {e}")
             return False
     
-    def get_first_log(self):
+    def get_log(self):
         logger.debug("get_first_log")
-        self.log_cur_page = 1
-        return self.get_logs()
+        if self.start_get_logs is False:
+            self.start_get_logs = True
+            self.log_cur_page += 1
 
-    def get_logs(self, page_size=1):
+    def get_logs(self, page_size=10):
         if not os.environ.get("DB_NAME"):
             return None
 
@@ -208,18 +210,20 @@ class AilyCtl:
                 return None
 
             cursor.execute(
-                "SELECT role, msg FROM conversations ORDER BY created_at ASC LIMIT ? OFFSET ?",
+                "SELECT role, msg FROM conversations ORDER BY created_at DESC LIMIT ? OFFSET ?",
                 (page_size, (self.log_cur_page - 1) * page_size),
             )
 
             fetchdata = cursor.fetchall()
-            if fetchdata:
-                data = {"role": fetchdata[0][0], "msg": fetchdata[0][1]}
-                self.log_cur_page += 1
+            self.start_get_logs = False
+            
+            return fetchdata
+            # if fetchdata:
+            #     # data = {"role": fetchdata[0][0], "msg": fetchdata[0][1]}
+            #     data = str(fetchdata[0][0]) + ":" + str(fetchdata[0][1])
+            #     return data
 
-                return data
-
-            return None
+            # return None
         except Exception as e:
             logger.error(f"get_logs: {e}")
             return None

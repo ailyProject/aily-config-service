@@ -32,6 +32,7 @@ logger.add(
 )
 
 BLE_SERVER: any
+NOTIFY_ONCE = []
 
 SERVICE_UUID = "123e4567-e89b-12d3-a456-426614174000"
 DEVICE_ID_UUID = "123e4567-e89b-12d3-a456-426614174001"
@@ -116,6 +117,18 @@ NOTIFY_CHRS = {
         "func": aily_ctl.get_status,
         "sleep": 20,
     },
+    LLM_MODEL_OPTIONS_UUID: {
+        "func": conf_ctl.get_llm_models,
+        "sleep": 1,
+    },
+    STT_MODEL_OPTIONS_UUID: {
+        "func": conf_ctl.get_stt_models,
+        "sleep": 1,
+    },
+    TTS_MODEL_OPTIONS_UUID: {
+        "func": conf_ctl.get_tts_models,
+        "sleep": 1,
+    }
 }
 
 READABLE_CHRS = {
@@ -131,7 +144,7 @@ READABLE_CHRS = {
     TTS_MODEL_UUID: aily_ctl.get_tts_model,
     TTS_KEY_UUID: aily_ctl.get_tts_key,
     TTS_ROLE_UUID: aily_ctl.get_tts_role,
-    AILY_CONVERSATION_UUID: aily_ctl.get_first_log,
+    AILY_CONVERSATION_UUID: aily_ctl.get_log,
     IP_UUID: device_ctl.get_ip,
     NETWORK_UUID: device_ctl.get_network,
     CPU_USAGE_UUID: device_ctl.get_cpu_usage,
@@ -140,6 +153,9 @@ READABLE_CHRS = {
     DISK_USAGE_UUID: device_ctl.get_disk_usage,
     BATTERY_UUID: device_ctl.get_battery,
     POWER_UUID: device_ctl.get_power,
+    LLM_MODEL_OPTIONS_UUID: conf_ctl.get_llm_models_start,
+    STT_MODEL_OPTIONS_UUID: conf_ctl.get_stt_models_start,
+    TTS_MODEL_OPTIONS_UUID: conf_ctl.get_tts_models_start,
 }
 
 WRITEABLE_CHRS = {
@@ -222,8 +238,21 @@ async def notify(server):
     current_time = 0
     while True:
         if await server.is_connected():
+            global NOTIFY_ONCE
             for key, item in NOTIFY_CHRS.items():
-                if key == AILY_CONVERSATION_UUID and aily_ctl.log_cur_page == 1:
+                if key in NOTIFY_ONCE:
+                    continue
+
+                if key == AILY_CONVERSATION_UUID and aily_ctl.start_get_logs is False:
+                    continue
+                
+                if key == LLM_MODEL_OPTIONS_UUID and conf_ctl.llm_models_started is False:
+                    continue
+                
+                if key == STT_MODEL_OPTIONS_UUID and conf_ctl.stt_models_started is False:
+                    continue
+                
+                if key == TTS_MODEL_OPTIONS_UUID and conf_ctl.tts_models_started is False:
                     continue
 
                 if current_time == 0 or current_time % item["sleep"] == 0:
@@ -234,23 +263,46 @@ async def notify(server):
                     continue
 
                 chr = server.get_characteristic(key)
-                if isinstance(value, str):
-                    value = value.encode()
-                elif isinstance(value, dict):
-                    value = json.dumps(value).encode()
-                else:
-                    value = str(value).encode()
                 
+                # logger.debug("value: {0}".format(value))
                 
                 if key == AILY_CONVERSATION_UUID:
-                    for i in range(0, len(value), 120):
-                        chr.value = value[i:i+120]
+                    for record in value:
+                        data = str(record[0]) + ":" + str(record[1])
+                        for i in range(0, len(data), 120):
+                            chr.value = (data[i:i+120]).encode()
+                            server.update_value(SERVICE_UUID, key)
+                            await asyncio.sleep(0.5)
+                        chr.value = "EOF".encode()
+                        server.update_value(SERVICE_UUID, key)
+                elif key in (LLM_MODEL_OPTIONS_UUID, STT_MODEL_OPTIONS_UUID, TTS_MODEL_OPTIONS_UUID):
+                    for item in value:
+                        chr.value = "{0}:{1}".format(item["name"], item["value"]).encode()
+                        # logger.debug(f"Sending {key} with {chr.value}")
                         server.update_value(SERVICE_UUID, key)
                         await asyncio.sleep(0.5)
+                    
                     chr.value = "EOF".encode()
+                    server.update_value(SERVICE_UUID, key)
+                    
+                    NOTIFY_ONCE.append(key)
                 else:
+                    if isinstance(value, str):
+                        value = value.encode()
+                    elif isinstance(value, dict):
+                        value = json.dumps(value).encode()
+                    else:
+                        value = str(value).encode()
+                    
                     chr.value = value
                     server.update_value(SERVICE_UUID, key)
+        else:
+            NOTIFY_ONCE = []
+            conf_ctl.llm_models_started = False
+            conf_ctl.stt_models_started = False
+            conf_ctl.tts_models_started = False
+            aily_ctl.log_cur_page = 0
+            aily_ctl.start_get_logs = False
 
         await asyncio.sleep(1)
         current_time = int(time.time())
@@ -358,7 +410,8 @@ async def run(loop):
                 "Value": (aily_ctl.get_llm_temp()).encode(),
             },
             LLM_MODEL_OPTIONS_UUID: {
-                "Properties": GATTCharacteristicProperties.read,
+                "Properties": GATTCharacteristicProperties.notify
+                | GATTCharacteristicProperties.read,
                 "Permissions": GATTAttributePermissions.readable,
                 "Value": json.dumps(conf_ctl.get_llm_models()).encode(),
             },
@@ -384,7 +437,8 @@ async def run(loop):
                 "Value": (aily_ctl.get_stt_key()).encode(),
             },
             STT_MODEL_OPTIONS_UUID: {
-                "Properties": GATTCharacteristicProperties.read,
+                "Properties": GATTCharacteristicProperties.notify
+                | GATTCharacteristicProperties.read,
                 "Permissions": GATTAttributePermissions.readable,
                 "Value": json.dumps(conf_ctl.get_stt_models()).encode(),
             },
@@ -417,12 +471,14 @@ async def run(loop):
                 "Value": aily_ctl.get_tts_role().encode(),
             },
             TTS_MODEL_OPTIONS_UUID: {
-                "Properties": GATTCharacteristicProperties.read,
+                "Properties": GATTCharacteristicProperties.notify
+                | GATTCharacteristicProperties.read,
                 "Permissions": GATTAttributePermissions.readable,
                 "Value": json.dumps(conf_ctl.get_tts_models()).encode(),
             },
             TTS_ROLE_OPTIONS_UUID: {
-                "Properties": GATTCharacteristicProperties.read,
+                "Properties": GATTCharacteristicProperties.notify
+                | GATTCharacteristicProperties.read,
                 "Permissions": GATTAttributePermissions.readable,
                 "Value": "{}".encode(),
             },
