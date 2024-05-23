@@ -80,6 +80,9 @@ class AilyCtl:
         return os.getenv("LLM_URL", "")
 
     def set_llm_url(self, value):
+        if not value:
+            value = ""
+
         os.environ["LLM_URL"] = value
         res, k, v = set_key(self.aily_env_path, "LLM_URL", value)
         return res
@@ -88,6 +91,9 @@ class AilyCtl:
         return os.getenv("LLM_MODEL") or ""
 
     def set_llm_model(self, value):
+        if not value:
+            value = ""
+            
         os.environ["LLM_MODEL"] = value
         res, k, v = set_key(self.aily_env_path, "LLM_MODEL", value)
         return res
@@ -96,6 +102,9 @@ class AilyCtl:
         return os.getenv("LLM_KEY") or ""
 
     def set_llm_key(self, value):
+        if not value:
+            value = ""
+
         os.environ["LLM_KEY"] = value
         res, k, v = set_key(self.aily_env_path, "LLM_KEY", value)
         return res
@@ -104,6 +113,9 @@ class AilyCtl:
         return os.getenv("LLM_PRE_PROMPT") or ""
 
     def set_llm_preprompt(self, value):
+        if not value:
+            value = ""
+
         os.environ["LLM_PRE_PROMPT"] = value
         res, k, v = set_key(self.aily_env_path, "LLM_PRE_PROMPT", value)
         return res
@@ -112,6 +124,9 @@ class AilyCtl:
         return os.getenv("LLM_TEMPERATURE") or ""
 
     def set_llm_temp(self, value):
+        if not value:
+            value = ""
+        
         os.environ["LLM_TEMPERATURE"] = value
         res, k, v = set_key(self.aily_env_path, "LLM_TEMPERATURE", value)
         return res
@@ -120,6 +135,9 @@ class AilyCtl:
         return os.getenv("STT_URL") or ""
 
     def set_stt_url(self, value):
+        if not value:
+            value = ""
+
         os.environ["STT_URL"] = value
         res, k, v = set_key(self.aily_env_path, "STT_URL", value)
         return res
@@ -128,6 +146,9 @@ class AilyCtl:
         return os.getenv("STT_MODEL") or ""
 
     def set_stt_model(self, value):
+        if not value:
+            value = ""
+    
         os.environ["STT_MODEL"] = value
         res, k, v = set_key(self.aily_env_path, "STT_MODEL", value)
         return res
@@ -136,6 +157,9 @@ class AilyCtl:
         return os.getenv("STT_KEY") or ""
 
     def set_stt_key(self, value):
+        if not value:
+            value = ""
+
         os.environ["STT_KEY"] = value
         res, k, v = set_key(self.aily_env_path, "STT_KEY", value)
         return res
@@ -144,6 +168,9 @@ class AilyCtl:
         return os.getenv("TTS_URL") or ""
 
     def set_tts_url(self, value):
+        if not value:
+            value = ""
+
         os.environ["TTS_URL"] = value
         res, k, v = set_key(self.aily_env_path, "TTS_URL", value)
         return res
@@ -152,6 +179,9 @@ class AilyCtl:
         return os.getenv("TTS_MODEL") or ""
 
     def set_tts_model(self, value):
+        if not value:
+            value = ""
+            
         os.environ["TTS_MODEL"] = value
         res, k, v = set_key(self.aily_env_path, "TTS_MODEL", value)
         return res
@@ -160,6 +190,9 @@ class AilyCtl:
         return os.getenv("TTS_KEY") or ""
 
     def set_tts_key(self, value):
+        if not value:
+            value = ""
+            
         os.environ["TTS_KEY"] = value
         res, k, v = set_key(self.aily_env_path, "TTS_KEY", value)
         return res
@@ -168,6 +201,9 @@ class AilyCtl:
         return os.getenv("TTS_ROLE") or ""
 
     def set_tts_role(self, value):
+        if not value:
+            value = ""
+
         os.environ["TTS_ROLE"] = value
         res, k, v = set_key(self.aily_env_path, "TTS_ROLE", value)
         return res
