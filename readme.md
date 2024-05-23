@@ -28,12 +28,18 @@ chmod +x deploy.sh
     make
     sudo make install
     ```
-- 服务配置:
+
+- 运行：
+    ```
+    bt-agent -c NoInputNoOutput
+    ```
+
+<!-- - 服务配置:
     ```
     sudo cp systemd/bluetools.service /etc/systemd/system/bluetools.service
     sudo systemctl start bluetools.service
     sudo systemctl enable bluetools.service
-    ```
+    ``` -->
 
 
 ### 参数配置
@@ -69,6 +75,7 @@ sudo apt-get install supervisor
 
 // 复制ailyconf配置文件
 sudo cp ailyconf.conf /etc/supervisor/conf.d/
+sudo cp bluetools.conf /etc/supervisor/conf.d/
 
 sudo supervisorctl reload
 ...

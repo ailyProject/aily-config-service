@@ -277,7 +277,7 @@ async def notify(server):
                         server.update_value(SERVICE_UUID, key)
                 elif key in (LLM_MODEL_OPTIONS_UUID, STT_MODEL_OPTIONS_UUID, TTS_MODEL_OPTIONS_UUID):
                     for item in value:
-                        chr.value = "{0}:{1}".format(item["name"], item["value"]).encode()
+                        chr.value = "{0}||{1}||{2}".format(item["name"], item["value"], item["server"]).encode()
                         # logger.debug(f"Sending {key} with {chr.value}")
                         server.update_value(SERVICE_UUID, key)
                         await asyncio.sleep(0.5)
