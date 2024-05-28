@@ -12,7 +12,7 @@ from loguru import logger
 class DeviceCtl:
     def __init__(self):
         pass
-    
+
     @staticmethod
     def get_deviceid():
         # 获取 MAC 地址
@@ -20,7 +20,7 @@ class DeviceCtl:
         # 转换为常见的 MAC 地址格式
         mac_address = "".join(("%012X" % mac)[i : i + 2] for i in range(0, 12, 2))
         return mac_address
-    
+
     @staticmethod
     def get_battery():
         try:
@@ -46,7 +46,7 @@ class DeviceCtl:
             return battery.percent
         except Exception as e:
             return "N/A"
-    
+
     @staticmethod
     def get_ram_usage():
         try:
@@ -54,7 +54,7 @@ class DeviceCtl:
             return ram_usage
         except Exception as e:
             return "N/A"
-    
+
     @staticmethod
     def get_cpu_tempture():
         try:
@@ -63,7 +63,7 @@ class DeviceCtl:
                 return round(float(cpu_temp) / 1000, 2)
         except FileNotFoundError:
             return "N/A"
-    
+
     @staticmethod
     def get_cpu_usage():
         try:
@@ -71,12 +71,12 @@ class DeviceCtl:
             return cpu_usage
         except Exception as e:
             return "N/A"
-    
+
     @staticmethod
     def get_network():
         net_status_list = psutil.net_if_stats()
         # 当前网络接口
-        
+
         current_net = "UNKNOWN"
         for key, value in net_status_list.items():
             if re.match(r"^lo", key):
@@ -90,7 +90,7 @@ class DeviceCtl:
             return "Wired"
         else:
             return "UNKNOWN"
-    
+
     @staticmethod
     def get_ip():
         s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -103,7 +103,18 @@ class DeviceCtl:
         finally:
             s.close()
         return IP
-    
+
+    def get_system_name(self):
+        try:
+            with open("/etc/os-release") as f:
+                for line in f:
+                    if line.startswith("VERSION_CODENAME"):
+                        return line.strip().split("=")[1].strip().strip('"')
+
+            return None
+        except Exception as e:
+            return None
+
     def _scan_wifi(self):
         try:
             logger.debug("Scanning wifi")
@@ -111,7 +122,7 @@ class DeviceCtl:
         except Exception as e:
             logger.error("Failed to scan wifi: {0}".format(e))
             return "N/A"
-    
+
     def set_wifi(self, value: str):
         logger.debug("Setting wifi: {0}".format(value))
         data = json.loads(value)
@@ -121,55 +132,64 @@ class DeviceCtl:
         password = data.get("password")
         if not ssid or not password:
             return
-        
-        retry = 5
-        find = False
 
-        while retry > 0:
-            self._scan_wifi()
-            
-            result = subprocess.check_output(["sudo", "nmcli", "dev", "wifi", "list"])
-            # logger.debug("Wifi list: {0}".format(result.decode("utf-8")))
-            ssid_list = result.decode("utf-8").split("\n")[1:]
-            ssid_list = [ssid.split()[1] for ssid in ssid_list if ssid]
-            
-            if ssid in ssid_list:
-                find = True
-                break
-            
-            logger.debug("SSID: {0} not found. Retry: {1}".format(ssid, retry))
-            retry -= 1
-        
-        if not find:
-            logger.error("SSID: {0} not found".format(ssid))
-            return -1
+        # 获取当前树莓派系统版本名称（VERSION_CODENAME）
+        version_name = self.get_system_name()
+        if version_name.lower() != "bookworm":
+            config_lines = [
+                "ctrl_interface=DIR=/var/run/wpa_supplicant GROUP=netdev",
+                "update_config=1",
+                "p2p_disabled=1" "\n",
+                "network={",
+                '\tssid="{}"'.format(ssid),
+                '\tpsk="{}"'.format(password),
+                "}",
+            ]
+            config = "\n".join(config_lines)
 
-        result = subprocess.check_output(["sudo", "nmcli", "device", "wifi", "connect", ssid, "password", password])
-        if "successfully activated" in result.decode("utf-8"):
-            return 1
+            # give access and writing. may have to do this manually beforehand
+            os.popen("sudo chmod a+w /etc/wpa_supplicant/wpa_supplicant.conf")
+
+            # writing to file
+            with open("/etc/wpa_supplicant/wpa_supplicant.conf", "w") as wifi:
+                wifi.write(config)
+
+            logger.info("Wifi config added. Refreshing configs")
+            ## refresh configs
+            try:
+                subprocess.check_call(["sudo", "wpa_cli", "-i", "wlan0", "reconfigure"])
+                return 1
+            except Exception as e:
+                logger.error("Failed to refresh wifi configs: {0}".format(e))
+                return -2
         else:
-            logger.debug("Failed to connect to {0}".format(ssid))
-            return -2
+            retry = 5
+            find = False
 
-        # config_lines = [
-        #     "ctrl_interface=DIR=/var/run/wpa_supplicant GROUP=netdev",
-        #     "update_config=1",
-        #     "p2p_disabled=1" "\n",
-        #     "network={",
-        #     '\tssid="{}"'.format(ssid),
-        #     '\tpsk="{}"'.format(password),
-        #     "}",
-        # ]
-        # config = "\n".join(config_lines)
+            while retry > 0:
+                self._scan_wifi()
 
-        # # give access and writing. may have to do this manually beforehand
-        # os.popen("sudo chmod a+w /etc/wpa_supplicant/wpa_supplicant.conf")
+                result = subprocess.check_output(["sudo", "nmcli", "dev", "wifi", "list"])
+                # logger.debug("Wifi list: {0}".format(result.decode("utf-8")))
+                ssid_list = result.decode("utf-8").split("\n")[1:]
+                ssid_list = [ssid.split()[1] for ssid in ssid_list if ssid]
 
-        # # writing to file
-        # with open("/etc/wpa_supplicant/wpa_supplicant.conf", "w") as wifi:
-        #     wifi.write(config)
+                if ssid in ssid_list:
+                    find = True
+                    break
 
-        # logger.info("Wifi config added. Refreshing configs")
-        # ## refresh configs
-        # subprocess.check_call(["sudo", "wpa_cli", "-i", "wlan0", "reconfigure"])
-        
+                logger.debug("SSID: {0} not found. Retry: {1}".format(ssid, retry))
+                retry -= 1
+
+            if not find:
+                logger.error("SSID: {0} not found".format(ssid))
+                return -1
+
+            result = subprocess.check_output(
+                ["sudo", "nmcli", "device", "wifi", "connect", ssid, "password", password]
+            )
+            if "successfully activated" in result.decode("utf-8"):
+                return 1
+            else:
+                logger.debug("Failed to connect to {0}".format(ssid))
+                return -2
