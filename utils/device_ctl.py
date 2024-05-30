@@ -6,6 +6,7 @@ import os
 import asyncio
 import subprocess
 import json
+import time
 from loguru import logger
 
 
@@ -114,11 +115,24 @@ class DeviceCtl:
             return None
         except Exception as e:
             return None
+    
+    def get_wifi_ssid(self):
+        try:
+            result = subprocess.run(["iw", "dev", "wlan0", "link"], capture_output=True, text=True, check=True)
+            for line in result.stdout.split("\n"):
+                if "SSID" in line:
+                    ssid = line.split('SSID: ')[1].strip()
+                    return ssid
+            return None
+        except Exception as e:
+            logger.error("Failed to get wifi ssid: {0}".format(e))
+            return None
 
     def _scan_wifi(self):
         try:
             logger.debug("Scanning wifi")
-            subprocess.check_output(["sudo", "nmcli", "dev", "wifi", "rescan"])
+            # subprocess.check_output(["sudo", "nmcli", "dev", "wifi", "rescan"])
+            subprocess.check_output(["sudo", "iwlist", "wlan0", "scan"])
         except Exception as e:
             logger.error("Failed to scan wifi: {0}".format(e))
             return "N/A"
@@ -130,6 +144,13 @@ class DeviceCtl:
             return
         ssid = data.get("ssid")
         password = data.get("password")
+        
+        old_ssid = self.get_wifi_ssid()
+        logger.debug("Old SSID: {0}".format(old_ssid))
+        if old_ssid == ssid:
+            logger.info("Already connected to {0}".format(ssid))
+            return 1
+        
         if not ssid or not password:
             return
 
@@ -167,8 +188,6 @@ class DeviceCtl:
             find = False
 
             while retry > 0:
-                self._scan_wifi()
-
                 result = subprocess.check_output(["sudo", "nmcli", "dev", "wifi", "list"])
                 # logger.debug("Wifi list: {0}".format(result.decode("utf-8")))
                 ssid_list = result.decode("utf-8").split("\n")[1:]
@@ -180,13 +199,16 @@ class DeviceCtl:
 
                 logger.debug("SSID: {0} not found. Retry: {1}".format(ssid, retry))
                 retry -= 1
+                
+                self._scan_wifi()
+                time.sleep(1)
 
             if not find:
                 logger.error("SSID: {0} not found".format(ssid))
                 return -1
 
             result = subprocess.check_output(
-                ["sudo", "nmcli", "device", "wifi", "connect", ssid, "password", password]
+                ["sudo", "nmcli", "dev", "wifi", "connect", ssid, "password", password]
             )
             if "successfully activated" in result.decode("utf-8"):
                 return 1
