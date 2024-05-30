@@ -368,14 +368,14 @@ async def run(loop):
             },
             WIFI_UUID: {
                 "Properties": GATTCharacteristicProperties.read
-                | GATTCharacteristicProperties.write,
+                | GATTCharacteristicProperties.write_without_response,
                 "Permissions": GATTAttributePermissions.readable
                 | GATTAttributePermissions.writeable,
                 "Value": "N/A".encode(),
             },
             LLM_MODEL_UUID: {
                 "Properties": GATTCharacteristicProperties.read
-                | GATTCharacteristicProperties.write
+                | GATTCharacteristicProperties.write_without_response
                 | GATTCharacteristicProperties.notify,
                 "Permissions": GATTAttributePermissions.readable
                 | GATTAttributePermissions.writeable,
@@ -383,28 +383,28 @@ async def run(loop):
             },
             LLM_URL_UUID: {
                 "Properties": GATTCharacteristicProperties.read
-                | GATTCharacteristicProperties.write,
+                | GATTCharacteristicProperties.write_without_response,
                 "Permissions": GATTAttributePermissions.readable
                 | GATTAttributePermissions.writeable,
                 "Value": (aily_ctl.get_llm_url()).encode(),
             },
             LLM_KEY_UUID: {
                 "Properties": GATTCharacteristicProperties.read
-                | GATTCharacteristicProperties.write,
+                | GATTCharacteristicProperties.write_without_response,
                 "Permissions": GATTAttributePermissions.readable
                 | GATTAttributePermissions.writeable,
                 "Value": (aily_ctl.get_llm_key()).encode(),
             },
             LLM_PRE_PROMPT_UUID: {
                 "Properties": GATTCharacteristicProperties.read
-                | GATTCharacteristicProperties.write,
+                | GATTCharacteristicProperties.write_without_response,
                 "Permissions": GATTAttributePermissions.readable
                 | GATTAttributePermissions.writeable,
                 "Value": (aily_ctl.get_llm_preprompt()).encode(),
             },
             LLM_TEMP_UUID: {
                 "Properties": GATTCharacteristicProperties.read
-                | GATTCharacteristicProperties.write,
+                | GATTCharacteristicProperties.write_without_response,
                 "Permissions": GATTAttributePermissions.readable
                 | GATTAttributePermissions.writeable,
                 "Value": (aily_ctl.get_llm_temp()).encode(),
@@ -417,21 +417,21 @@ async def run(loop):
             },
             STT_URL_UUID: {
                 "Properties": GATTCharacteristicProperties.read
-                | GATTCharacteristicProperties.write,
+                | GATTCharacteristicProperties.write_without_response,
                 "Permissions": GATTAttributePermissions.readable
                 | GATTAttributePermissions.writeable,
                 "Value": (aily_ctl.get_stt_url()).encode(),
             },
             STT_MODEL_UUID: {
                 "Properties": GATTCharacteristicProperties.read
-                | GATTCharacteristicProperties.write,
+                | GATTCharacteristicProperties.write_without_response,
                 "Permissions": GATTAttributePermissions.readable
                 | GATTAttributePermissions.writeable,
                 "Value": (aily_ctl.get_stt_model()).encode(),
             },
             STT_KEY_UUID: {
                 "Properties": GATTCharacteristicProperties.read
-                | GATTCharacteristicProperties.write,
+                | GATTCharacteristicProperties.write_without_response,
                 "Permissions": GATTAttributePermissions.readable
                 | GATTAttributePermissions.writeable,
                 "Value": (aily_ctl.get_stt_key()).encode(),
@@ -444,28 +444,28 @@ async def run(loop):
             },
             TTS_URL_UUID: {
                 "Properties": GATTCharacteristicProperties.read
-                | GATTCharacteristicProperties.write,
+                | GATTCharacteristicProperties.write_without_response,
                 "Permissions": GATTAttributePermissions.readable
                 | GATTAttributePermissions.writeable,
                 "Value": aily_ctl.get_tts_url().encode(),
             },
             TTS_MODEL_UUID: {
                 "Properties": GATTCharacteristicProperties.read
-                | GATTCharacteristicProperties.write,
+                | GATTCharacteristicProperties.write_without_response,
                 "Permissions": GATTAttributePermissions.readable
                 | GATTAttributePermissions.writeable,
                 "Value": aily_ctl.get_tts_model().encode(),
             },
             TTS_KEY_UUID: {
                 "Properties": GATTCharacteristicProperties.read
-                | GATTCharacteristicProperties.write,
+                | GATTCharacteristicProperties.write_without_response,
                 "Permissions": GATTAttributePermissions.readable
                 | GATTAttributePermissions.writeable,
                 "Value": aily_ctl.get_tts_key().encode(),
             },
             TTS_ROLE_UUID: {
                 "Properties": GATTCharacteristicProperties.read
-                | GATTCharacteristicProperties.write,
+                | GATTCharacteristicProperties.write_without_response,
                 "Permissions": GATTAttributePermissions.readable
                 | GATTAttributePermissions.writeable,
                 "Value": aily_ctl.get_tts_role().encode(),
@@ -490,7 +490,7 @@ async def run(loop):
             },
             AILY_RELOAD_UUID: {
                 "Properties": GATTCharacteristicProperties.read
-                | GATTCharacteristicProperties.write,
+                | GATTCharacteristicProperties.write_without_response,
                 "Permissions": GATTAttributePermissions.readable
                 | GATTAttributePermissions.writeable,
                 "Value": "".encode(),
