@@ -268,7 +268,11 @@ async def notify(server):
                 
                 if key == AILY_CONVERSATION_UUID:
                     for record in value:
-                        data = str(record[0]) + ":" + str(record[1])
+                        if record[2] == "image":
+                            # user:text:This is an image
+                            data = str(record[0]) + ":text:This is an image"
+                        else:
+                            data = str(record[0]) + ":text:" + str(record[1])
                         for i in range(0, len(data), 120):
                             chr.value = (data[i:i+120]).encode()
                             server.update_value(SERVICE_UUID, key)

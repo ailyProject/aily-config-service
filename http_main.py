@@ -32,7 +32,7 @@ class ModelDataUpdate(BaseModel):
     llmModel: str
     llmKey: str
     llmPrePrompt: str
-    llmTemp: float
+    llmTemp: str
     sttURL: str
     sttModel: str
     sttKey: str
@@ -131,7 +131,7 @@ async def set_model_data(
     aily_ctl.set_tts_key(data.ttsKey)
     aily_ctl.set_tts_role(data.ttsRole)
     
-    aily_ctl.save()
+    aily_ctl.save("reload")
     
     return ResponseModel()
 
