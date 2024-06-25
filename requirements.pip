@@ -3,3 +3,4 @@ psutil==5.9.8
 python-dotenv==1.0.1
 pyyaml==6.0.1
 bless
+fastapi==0.111.0
