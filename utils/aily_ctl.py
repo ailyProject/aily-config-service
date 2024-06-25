@@ -246,7 +246,7 @@ class AilyCtl:
                 return None
 
             cursor.execute(
-                "SELECT role, msg FROM conversations ORDER BY created_at DESC LIMIT ? OFFSET ?",
+                "SELECT role, msg, msg_type FROM conversations ORDER BY created_at DESC LIMIT ? OFFSET ?",
                 (page_size, (self.log_cur_page - 1) * page_size),
             )
 
