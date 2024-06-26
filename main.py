@@ -302,9 +302,9 @@ async def notify(server):
                     server.update_value(SERVICE_UUID, key)
         else:
             NOTIFY_ONCE = []
-            conf_ctl.llm_models_started = False
-            conf_ctl.stt_models_started = False
-            conf_ctl.tts_models_started = False
+            # conf_ctl.llm_models_started = False
+            # conf_ctl.stt_models_started = False
+            # conf_ctl.tts_models_started = False
             aily_ctl.log_cur_page = 0
             aily_ctl.start_get_logs = False
 
