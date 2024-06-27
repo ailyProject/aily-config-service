@@ -64,6 +64,7 @@ TTS_ROLE_OPTIONS_UUID = "123e4567-e89b-12d3-a456-00805f9b3508"
 AILY_STATUS_UUID = "123e4567-e89b-12d3-a456-00805f9b350b"
 AILY_RELOAD_UUID = "123e4567-e89b-12d3-a456-00805f9b3509"
 AILY_CONVERSATION_UUID = "123e4567-e89b-12d3-a456-00805f9b350a"
+AILY_MORE_LOGS_UUID = "123e4567-e89b-12d3-a456-00805f9b350e"
 
 UPDATE_RES_UUID = "123e4567-e89b-12d3-a456-426614174011"
 
@@ -158,6 +159,7 @@ READABLE_CHRS = {
     TTS_KEY_UUID: aily_ctl.get_tts_key,
     TTS_ROLE_UUID: aily_ctl.get_tts_role,
     AILY_CONVERSATION_UUID: aily_ctl.get_log,
+    AILY_MORE_LOGS_UUID: aily_ctl.get_next_log,
     IP_UUID: device_ctl.get_ip,
     NETWORK_UUID: device_ctl.get_network,
     CPU_USAGE_UUID: device_ctl.get_cpu_usage,
@@ -280,17 +282,23 @@ async def notify(server):
                 # logger.debug("value: {0}".format(value))
                 
                 if key == AILY_CONVERSATION_UUID:
-                    for record in value:
-                        if record[2] == "image":
-                            # user:text:This is an image
-                            data = str(record[0]) + ":text:This is an image"
-                        else:
-                            data = str(record[0]) + ":text:" + str(record[1])
-                        for i in range(0, len(data), 120):
-                            chr.value = (data[i:i+120]).encode()
+                    # logger.debug("logs: {0}".format(value))
+                    if value:
+                        for record in value:
+                            if record[2] == "image":
+                                # user:text:This is an image
+                                data = str(record[0]) + ":text:This is an image"
+                            else:
+                                data = str(record[0]) + ":text:" + str(record[1])
+                            for i in range(0, len(data), 120):
+                                chr.value = (data[i:i+120]).encode()
+                                server.update_value(SERVICE_UUID, key)
+                                await asyncio.sleep(0.5)
+                            chr.value = "EOF".encode()
                             server.update_value(SERVICE_UUID, key)
-                            await asyncio.sleep(0.5)
-                        chr.value = "EOF".encode()
+                    else:
+                        logger.debug("No logs")
+                        chr.value = "None".encode()
                         server.update_value(SERVICE_UUID, key)
                 elif key in (LLM_MODEL_OPTIONS_UUID, STT_MODEL_OPTIONS_UUID, TTS_MODEL_OPTIONS_UUID):
                     str_value = json.dumps(value)
@@ -393,7 +401,7 @@ async def run(loop):
             },
             WIFI_UUID: {
                 "Properties": GATTCharacteristicProperties.read
-                | GATTCharacteristicProperties.write_without_response,
+                | GATTCharacteristicProperties.write,
                 "Permissions": GATTAttributePermissions.readable
                 | GATTAttributePermissions.writeable,
                 "Value": "N/A".encode(),
@@ -523,6 +531,11 @@ async def run(loop):
             AILY_CONVERSATION_UUID: {
                 "Properties": GATTCharacteristicProperties.notify
                 | GATTCharacteristicProperties.read,
+                "Permissions": GATTAttributePermissions.readable,
+                "Value": "".encode(),
+            },
+            AILY_MORE_LOGS_UUID: {
+                "Properties": GATTCharacteristicProperties.read,
                 "Permissions": GATTAttributePermissions.readable,
                 "Value": "".encode(),
             },

@@ -5,7 +5,7 @@ from fastapi import FastAPI
 from pydantic import BaseModel
 from starlette.middleware.cors import CORSMiddleware
 from dotenv import load_dotenv
-from typing import Any
+from typing import Any, Optional
 
 from loguru import logger
 
@@ -28,18 +28,18 @@ class ResponseModel(BaseModel):
 
 
 class ModelDataUpdate(BaseModel):
-    llmURL: str
-    llmModel: str
-    llmKey: str
-    llmPrePrompt: str
-    llmTemp: str
-    sttURL: str
-    sttModel: str
-    sttKey: str
-    ttsURL: str
-    ttsModel: str
-    ttsKey: str
-    ttsRole: str
+    llmURL: Optional[str] = ""
+    llmModel: Optional[str] = ""
+    llmKey: Optional[str] = ""
+    llmPrePrompt: Optional[str] = ""
+    llmTemp: Optional[str] = ""
+    sttURL: Optional[str] = ""
+    sttModel: Optional[str] = ""
+    sttKey: Optional[str] = ""
+    ttsURL: Optional[str] = ""
+    ttsModel: Optional[str] = ""
+    ttsKey: Optional[str] = ""
+    ttsRole: Optional[str] = ""
 
 
 app = FastAPI()
@@ -54,6 +54,11 @@ app.add_middleware(
 )
 
 API_PREFIX = "/api/v1"
+
+
+@app.get(f"{API_PREFIX}/ping")
+async def get_ping():
+    return ResponseModel(data="pong")
 
 
 @app.get(f"{API_PREFIX}/logs")
@@ -130,9 +135,9 @@ async def set_model_data(
     aily_ctl.set_tts_model(data.ttsModel)
     aily_ctl.set_tts_key(data.ttsKey)
     aily_ctl.set_tts_role(data.ttsRole)
-    
+
     aily_ctl.save("reload")
-    
+
     return ResponseModel()
 
 

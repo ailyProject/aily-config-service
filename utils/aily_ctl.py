@@ -219,10 +219,17 @@ class AilyCtl:
             return False
     
     def get_log(self):
-        logger.debug("get_first_log")
-        if self.start_get_logs is False:
-            self.start_get_logs = True
-            self.log_cur_page += 1
+        logger.debug(f"get_log")
+        self.start_get_logs = True
+        self.log_cur_page = 1
+        # if self.start_get_logs is False:
+        #     self.start_get_logs = True
+        #     self.log_cur_page += 1
+    
+    def get_next_log(self):
+        logger.debug("get_next_log")
+        self.start_get_logs = True
+        self.log_cur_page += 1
 
     def get_logs(self, page_size=10):
         if not os.environ.get("DB_NAME"):
