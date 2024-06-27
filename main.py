@@ -72,30 +72,37 @@ NOTIFY_CHRS = {
     DEVICE_ID_UUID: {
         "func": device_ctl.get_deviceid,
         "sleep": 60,
+        "first": True
     },
     BATTERY_UUID: {
         "func": device_ctl.get_battery,
         "sleep": 60,
+        "first": True
     },
     DISK_USAGE_UUID: {
         "func": device_ctl.get_disk_usage,
         "sleep": 60,
+        "first": True
     },
     POWER_UUID: {
         "func": device_ctl.get_power,
         "sleep": 60,
+        "first": True
     },
     RAM_USAGE_UUID: {
         "func": device_ctl.get_ram_usage,
         "sleep": 10,
+        "first": True
     },
     CPU_TEMP_UUID: {
         "func": device_ctl.get_cpu_tempture,
         "sleep": 10,
+        "first": True
     },
     CPU_USAGE_UUID: {
         "func": device_ctl.get_cpu_usage,
         "sleep": 10,
+        "first": True
     },
     # NETWORK_UUID: {
     #     "func": device_ctl.get_network,
@@ -108,26 +115,32 @@ NOTIFY_CHRS = {
     LLM_MODEL_UUID: {
         "func": aily_ctl.get_llm_model,
         "sleep": 15,
+        "first": True
     },
     AILY_CONVERSATION_UUID: {
         "func": aily_ctl.get_logs,
         "sleep": 1,
+        "first": True
     },
     AILY_STATUS_UUID: {
         "func": aily_ctl.get_status,
         "sleep": 20,
+        "first": True
     },
     LLM_MODEL_OPTIONS_UUID: {
         "func": conf_ctl.get_llm_models,
-        "sleep": 1,
+        "sleep": 90,
+        "first": True,
     },
     STT_MODEL_OPTIONS_UUID: {
         "func": conf_ctl.get_stt_models,
-        "sleep": 1,
+        "sleep": 90,
+        "first": True,
     },
     TTS_MODEL_OPTIONS_UUID: {
         "func": conf_ctl.get_tts_models,
-        "sleep": 1,
+        "sleep": 90,
+        "first": True
     }
 }
 
@@ -227,7 +240,7 @@ def write_request(characteristic: BlessGATTCharacteristic, value: Any, **kwargs)
     res = func(value.decode("utf-8") if value else None)
 
     if characteristic.uuid == WIFI_UUID:
-        if res == 1:
+        if res == 1: 
             emit_update("wifi")
         emit_update("update", json.dumps({"type": "wifi", "status": res}))
     elif characteristic.uuid == AILY_RELOAD_UUID:
@@ -240,8 +253,8 @@ async def notify(server):
         if await server.is_connected():
             global NOTIFY_ONCE
             for key, item in NOTIFY_CHRS.items():
-                if key in NOTIFY_ONCE:
-                    continue
+                # if key in NOTIFY_ONCE:
+                #     continue
 
                 if key == AILY_CONVERSATION_UUID and aily_ctl.start_get_logs is False:
                     continue
@@ -255,7 +268,7 @@ async def notify(server):
                 if key == TTS_MODEL_OPTIONS_UUID and conf_ctl.tts_models_started is False:
                     continue
 
-                if current_time == 0 or current_time % item["sleep"] == 0:
+                if current_time == 0 or item["first"] is True or current_time % item["sleep"] == 0:
                     value = item["func"]()
                     if value is None:
                         continue
@@ -280,16 +293,22 @@ async def notify(server):
                         chr.value = "EOF".encode()
                         server.update_value(SERVICE_UUID, key)
                 elif key in (LLM_MODEL_OPTIONS_UUID, STT_MODEL_OPTIONS_UUID, TTS_MODEL_OPTIONS_UUID):
-                    for item in value:
-                        chr.value = "{0}||{1}||{2}".format(item["name"], item["value"], item["server"]).encode()
-                        # logger.debug(f"Sending {key} with {chr.value}")
+                    str_value = json.dumps(value)
+                    logger.debug(f"Sending {key} with {str_value}")
+                    
+                    for i in range(0, len(str_value), 120):
+                        chr.value = (str_value[i:i+120]).encode()
                         server.update_value(SERVICE_UUID, key)
                         await asyncio.sleep(0.5)
                     
+                    # for item in value:
+                    #     chr.value = "{0}||{1}||{2}".format(item["name"], item["value"], item["server"]).encode()
+                    #     # logger.debug(f"Sending {key} with {chr.value}")
+                    #     server.update_value(SERVICE_UUID, key)
+                        # await asyncio.sleep(0.5)
+                    
                     chr.value = "EOF".encode()
                     server.update_value(SERVICE_UUID, key)
-                    
-                    NOTIFY_ONCE.append(key)
                 else:
                     if isinstance(value, str):
                         value = value.encode()
@@ -300,11 +319,13 @@ async def notify(server):
                     
                     chr.value = value
                     server.update_value(SERVICE_UUID, key)
+                
+                item["first"] = False
         else:
             NOTIFY_ONCE = []
-            # conf_ctl.llm_models_started = False
-            # conf_ctl.stt_models_started = False
-            # conf_ctl.tts_models_started = False
+            for key, item in NOTIFY_CHRS.items():
+                item["first"] = True
+    
             aily_ctl.log_cur_page = 0
             aily_ctl.start_get_logs = False
 
@@ -379,7 +400,7 @@ async def run(loop):
             },
             LLM_MODEL_UUID: {
                 "Properties": GATTCharacteristicProperties.read
-                | GATTCharacteristicProperties.write_without_response
+                | GATTCharacteristicProperties.write
                 | GATTCharacteristicProperties.notify,
                 "Permissions": GATTAttributePermissions.readable
                 | GATTAttributePermissions.writeable,
@@ -387,28 +408,28 @@ async def run(loop):
             },
             LLM_URL_UUID: {
                 "Properties": GATTCharacteristicProperties.read
-                | GATTCharacteristicProperties.write_without_response,
+                | GATTCharacteristicProperties.write,
                 "Permissions": GATTAttributePermissions.readable
                 | GATTAttributePermissions.writeable,
                 "Value": (aily_ctl.get_llm_url()).encode(),
             },
             LLM_KEY_UUID: {
                 "Properties": GATTCharacteristicProperties.read
-                | GATTCharacteristicProperties.write_without_response,
+                | GATTCharacteristicProperties.write,
                 "Permissions": GATTAttributePermissions.readable
                 | GATTAttributePermissions.writeable,
                 "Value": (aily_ctl.get_llm_key()).encode(),
             },
             LLM_PRE_PROMPT_UUID: {
                 "Properties": GATTCharacteristicProperties.read
-                | GATTCharacteristicProperties.write_without_response,
+                | GATTCharacteristicProperties.write,
                 "Permissions": GATTAttributePermissions.readable
                 | GATTAttributePermissions.writeable,
                 "Value": (aily_ctl.get_llm_preprompt()).encode(),
             },
             LLM_TEMP_UUID: {
                 "Properties": GATTCharacteristicProperties.read
-                | GATTCharacteristicProperties.write_without_response,
+                | GATTCharacteristicProperties.write,
                 "Permissions": GATTAttributePermissions.readable
                 | GATTAttributePermissions.writeable,
                 "Value": (aily_ctl.get_llm_temp()).encode(),
@@ -421,21 +442,21 @@ async def run(loop):
             },
             STT_URL_UUID: {
                 "Properties": GATTCharacteristicProperties.read
-                | GATTCharacteristicProperties.write_without_response,
+                | GATTCharacteristicProperties.write,
                 "Permissions": GATTAttributePermissions.readable
                 | GATTAttributePermissions.writeable,
                 "Value": (aily_ctl.get_stt_url()).encode(),
             },
             STT_MODEL_UUID: {
                 "Properties": GATTCharacteristicProperties.read
-                | GATTCharacteristicProperties.write_without_response,
+                | GATTCharacteristicProperties.write,
                 "Permissions": GATTAttributePermissions.readable
                 | GATTAttributePermissions.writeable,
                 "Value": (aily_ctl.get_stt_model()).encode(),
             },
             STT_KEY_UUID: {
                 "Properties": GATTCharacteristicProperties.read
-                | GATTCharacteristicProperties.write_without_response,
+                | GATTCharacteristicProperties.write,
                 "Permissions": GATTAttributePermissions.readable
                 | GATTAttributePermissions.writeable,
                 "Value": (aily_ctl.get_stt_key()).encode(),
@@ -448,28 +469,28 @@ async def run(loop):
             },
             TTS_URL_UUID: {
                 "Properties": GATTCharacteristicProperties.read
-                | GATTCharacteristicProperties.write_without_response,
+                | GATTCharacteristicProperties.write,
                 "Permissions": GATTAttributePermissions.readable
                 | GATTAttributePermissions.writeable,
                 "Value": aily_ctl.get_tts_url().encode(),
             },
             TTS_MODEL_UUID: {
                 "Properties": GATTCharacteristicProperties.read
-                | GATTCharacteristicProperties.write_without_response,
+                | GATTCharacteristicProperties.write,
                 "Permissions": GATTAttributePermissions.readable
                 | GATTAttributePermissions.writeable,
                 "Value": aily_ctl.get_tts_model().encode(),
             },
             TTS_KEY_UUID: {
                 "Properties": GATTCharacteristicProperties.read
-                | GATTCharacteristicProperties.write_without_response,
+                | GATTCharacteristicProperties.write,
                 "Permissions": GATTAttributePermissions.readable
                 | GATTAttributePermissions.writeable,
                 "Value": aily_ctl.get_tts_key().encode(),
             },
             TTS_ROLE_UUID: {
                 "Properties": GATTCharacteristicProperties.read
-                | GATTCharacteristicProperties.write_without_response,
+                | GATTCharacteristicProperties.write,
                 "Permissions": GATTAttributePermissions.readable
                 | GATTAttributePermissions.writeable,
                 "Value": aily_ctl.get_tts_role().encode(),
@@ -494,7 +515,7 @@ async def run(loop):
             },
             AILY_RELOAD_UUID: {
                 "Properties": GATTCharacteristicProperties.read
-                | GATTCharacteristicProperties.write_without_response,
+                | GATTCharacteristicProperties.write,
                 "Permissions": GATTAttributePermissions.readable
                 | GATTAttributePermissions.writeable,
                 "Value": "".encode(),
